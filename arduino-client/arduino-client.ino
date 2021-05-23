@@ -1,7 +1,11 @@
 /* 
  *  Based on: https://gist.github.com/bonsi/9298780eefc6a0b1057f19779a901001
  *  
- *  Board: Arduino Nano
+ *  Board: Arduino Nano.
+ *
+ *  Pin D2 connected to RX1 on drone micro controller.
+ *  Pin D3 connected to RX on drone micro controller.
+ *
   */
 #include <SoftwareSerial.h>
 
