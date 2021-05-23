@@ -1,0 +1,118 @@
+# diff all
+
+# version
+# BetaFlight/SPRACINGF3EVO 3.0.1 Oct 18 2016 / 10:36:44 (48b7b4f)
+
+# reset configuration to default settings
+defaults
+
+# name
+
+# mixer
+
+# servo
+
+# servo mix
+
+
+# feature
+feature -BLACKBOX
+feature -TRANSPONDER
+feature SOFTSERIAL
+
+# beeper
+
+# map
+
+# serial
+serial 0 1 9600 57600 0 115200
+
+# led
+
+# color
+
+# mode_color
+
+# aux
+
+# adjrange
+
+# rxrange
+
+# rxfail
+
+# master
+set mid_rc = 0
+set min_check = 0
+set max_check = 0
+set rc_interpolation = OFF
+set rc_interpolation_interval = 0
+set airmode_activate_throttle = 0
+set rx_min_usec = 0
+set rx_max_usec = 0
+
+# profile
+profile 0
+
+rateprofile 0
+
+# rateprofile
+rateprofile 0
+
+
+# rateprofile
+rateprofile 1
+
+
+# rateprofile
+rateprofile 2
+
+
+# restore original rateprofile selection
+rateprofile 0
+
+# profile
+profile 1
+
+rateprofile 0
+
+# rateprofile
+rateprofile 0
+
+
+# rateprofile
+rateprofile 1
+
+
+# rateprofile
+rateprofile 2
+
+
+# restore original rateprofile selection
+rateprofile 0
+
+# profile
+profile 2
+
+rateprofile 0
+
+# rateprofile
+rateprofile 0
+
+
+# rateprofile
+rateprofile 1
+
+
+# rateprofile
+rateprofile 2
+
+
+# restore original rateprofile selection
+rateprofile 0
+
+# restore original profile selection
+profile 0
+
+# save configuration
+save
