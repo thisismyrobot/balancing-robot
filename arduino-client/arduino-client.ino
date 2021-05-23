@@ -59,7 +59,7 @@ void readData() {
                 roll = (roll & 0xFF00) >> 8 | (roll & 0x00FF) << 8; // Reverse the order of bytes
                 break;
             case 8:
-                pitch += c;
+                pitch = c;
                 break;
             case 9:
                 pitch <<= 8;
@@ -67,7 +67,7 @@ void readData() {
                 pitch = (pitch & 0xFF00) >> 8 | (pitch & 0x00FF) << 8; // Reverse the order of bytes
                 break;
             case 10:
-                yaw += c;
+                yaw = c;
                 break;
             case 11:
                 yaw <<= 8;
