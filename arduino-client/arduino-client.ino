@@ -2,24 +2,38 @@
  *  Based on: https://gist.github.com/bonsi/9298780eefc6a0b1057f19779a901001
  *  
  *  Board: Arduino Nano.
+ *  Extra Libraries: PID
  *
  *  Pin D2 connected to RX1 on drone micro controller.
  *  Pin D3 connected to RX on drone micro controller.
  *
   */
 #include <SoftwareSerial.h>
+#include <PID_v1.h>
 
 #define MSP_ATTITUDE 108
+#define MOTOR_FORWARD 5
+#define MOTOR_REVERSE 6
+#define MIN_MOTOR 60
+#define BURST_MS 10
+
+double PidSetpoint;
+double PidInput;
+double PidOutput;
+PID myPID(&PidInput, &PidOutput, &PidSetpoint, 2, 5, 1, DIRECT);
 
 SoftwareSerial mspSerial(3, 2); // RX TX
 
-int ledError = 0;
-
 void setup() {
-    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(MOTOR_FORWARD, OUTPUT);
+    pinMode(MOTOR_REVERSE, OUTPUT);
 
     mspSerial.begin(9600);
     Serial.begin(115200);
+
+    myPID.SetOutputLimits(-255, 255);
+    PidSetpoint = 0;
+    myPID.SetMode(AUTOMATIC);
 }
 
 void loop() {
@@ -27,17 +41,31 @@ void loop() {
     uint8_t *data = &datad;
 
     sendMSP(MSP_ATTITUDE, data, 0);
-    int pitch = readData();
+    PidInput = readPitch();
+    myPID.Compute();
+    updateMotion(PidOutput);
 
-    Serial.println("Pitch: " + String(pitch/10.0));
+    Serial.println("PidInput: " + String(PidInput) + ", PidOutput: " + String(PidOutput));
+}
 
-    ledError = pitch / 10;
-    if (ledError < 0) {
-      ledError = -ledError;
-    }
-    if (ledError > 100) {
-      ledError = 100;
-    }
+// + -> - 255
+void updateMotion(int value)
+{
+  value = min(255, max(-255, value));
+
+  if (value == 0) {
+      analogWrite(MOTOR_FORWARD, 0);
+      analogWrite(MOTOR_REVERSE, 0);
+  }
+  else if (value > 0) {
+      analogWrite(MOTOR_FORWARD, value);
+      analogWrite(MOTOR_REVERSE, 0);
+  
+  } 
+  else {
+      analogWrite(MOTOR_FORWARD, 0);
+      analogWrite(MOTOR_REVERSE, -value);    
+  }
 }
 
 void sendMSP(uint8_t cmd, uint8_t *data, uint8_t n_bytes) {
@@ -54,11 +82,8 @@ void sendMSP(uint8_t cmd, uint8_t *data, uint8_t n_bytes) {
     mspSerial.write(checksum);
 }
 
-int readData() {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(ledError);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(100 - ledError);
+double readPitch() {
+    delay(100);
 
     byte count = 0;
 
@@ -97,5 +122,5 @@ int readData() {
         }
     }
 
-    return pitch;
+    return pitch / 10.0;
 }
