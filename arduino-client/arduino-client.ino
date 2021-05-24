@@ -19,11 +19,13 @@
 double PidSetpoint;
 double PidInput;
 double PidOutput;
-PID myPID(&PidInput, &PidOutput, &PidSetpoint, 2, 5, 1, DIRECT);
+PID myPID(&PidInput, &PidOutput, &PidSetpoint, 2, 0, 0, DIRECT);
 
 SoftwareSerial mspSerial(3, 2); // RX TX
 
 void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
+
     pinMode(MOTOR_FORWARD, OUTPUT);
     pinMode(MOTOR_REVERSE, OUTPUT);
 
@@ -31,7 +33,7 @@ void setup() {
     Serial.begin(115200);
 
     myPID.SetOutputLimits(-255, 255);
-    PidSetpoint = 0;
+    PidSetpoint = -9.4;
     myPID.SetMode(AUTOMATIC);
 }
 
@@ -40,7 +42,18 @@ void loop() {
     uint8_t *data = &datad;
 
     sendMSP(MSP_ATTITUDE, data, 0);
-    PidInput = readPitch();
+    double pitch = readPitch();
+
+    if (pitch < PidSetpoint + 1.5 && pitch > PidSetpoint - 1.5) {
+      pitch = PidSetpoint;
+      digitalWrite(LED_BUILTIN, LOW);
+    }
+    else {
+       digitalWrite(LED_BUILTIN, HIGH);
+    }
+
+    PidInput = pitch;
+    
     myPID.Compute();
     updateMotion(PidOutput);
 
@@ -48,13 +61,13 @@ void loop() {
 }
 
 // + -> - 255
-void updateMotion(int value)
+void updateMotion(double value)
 {
   value = min(255, max(-255, value));
 
   if (value == 0) {
-      analogWrite(MOTOR_FORWARD, 0);
-      analogWrite(MOTOR_REVERSE, 0);
+      analogWrite(MOTOR_FORWARD, 255);
+      analogWrite(MOTOR_REVERSE, 255);
   }
   else if (value > 0) {
       value = map(value, 0, 255, MIN_MOTOR, 255);
@@ -63,9 +76,10 @@ void updateMotion(int value)
   } 
   else {
       value = -value;
+
       value = map(value, 0, 255, MIN_MOTOR, 255);
       analogWrite(MOTOR_FORWARD, 0);
-      analogWrite(MOTOR_REVERSE, value);    
+      analogWrite(MOTOR_REVERSE, value);
   }
 }
 
@@ -125,3 +139,4 @@ double readPitch() {
 
     return pitch / 10.0;
 }
+
