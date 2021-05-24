@@ -15,7 +15,6 @@
 #define MOTOR_FORWARD 5
 #define MOTOR_REVERSE 6
 #define MIN_MOTOR 60
-#define BURST_MS 10
 
 double PidSetpoint;
 double PidInput;
@@ -58,13 +57,15 @@ void updateMotion(int value)
       analogWrite(MOTOR_REVERSE, 0);
   }
   else if (value > 0) {
+      value = map(value, 0, 255, MIN_MOTOR, 255);
       analogWrite(MOTOR_FORWARD, value);
       analogWrite(MOTOR_REVERSE, 0);
-  
   } 
   else {
+      value = -value;
+      value = map(value, 0, 255, MIN_MOTOR, 255);
       analogWrite(MOTOR_FORWARD, 0);
-      analogWrite(MOTOR_REVERSE, -value);    
+      analogWrite(MOTOR_REVERSE, value);    
   }
 }
 
