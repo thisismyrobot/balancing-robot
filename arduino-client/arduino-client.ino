@@ -13,10 +13,13 @@
 
 SoftwareSerial mspSerial(3, 2); // RX TX
 
+int ledError = 0;
+
 void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
+
     mspSerial.begin(9600);
     Serial.begin(115200);
-    Serial.println("setup end");
 }
 
 void loop() {
@@ -24,7 +27,17 @@ void loop() {
     uint8_t *data = &datad;
 
     sendMSP(MSP_ATTITUDE, data, 0);
-    readData();
+    int pitch = readData();
+
+    Serial.println("Pitch: " + String(pitch/10.0));
+
+    ledError = pitch / 10;
+    if (ledError < 0) {
+      ledError = -ledError;
+    }
+    if (ledError > 100) {
+      ledError = 100;
+    }
 }
 
 void sendMSP(uint8_t cmd, uint8_t *data, uint8_t n_bytes) {
@@ -41,8 +54,11 @@ void sendMSP(uint8_t cmd, uint8_t *data, uint8_t n_bytes) {
     mspSerial.write(checksum);
 }
 
-void readData() {
-    delay(100);
+int readData() {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(ledError);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(100 - ledError);
 
     byte count = 0;
 
@@ -81,7 +97,5 @@ void readData() {
         }
     }
 
-    Serial.print("Roll: " + String(roll/10.0));
-    Serial.print(" Pitch: " + String(pitch/10.0));
-    Serial.println(" Yaw: " + String(yaw));
+    return pitch;
 }
