@@ -19,7 +19,7 @@
 double PidSetpoint;
 double PidInput;
 double PidOutput;
-PID myPID(&PidInput, &PidOutput, &PidSetpoint, 2, 0, 0, DIRECT);
+PID myPID(&PidInput, &PidOutput, &PidSetpoint, 10, 1, 0, DIRECT);
 
 SoftwareSerial mspSerial(3, 2); // RX TX
 
@@ -33,8 +33,10 @@ void setup() {
     Serial.begin(115200);
 
     myPID.SetOutputLimits(-255, 255);
-    PidSetpoint = -9.4;
+    PidSetpoint = -2;
     myPID.SetMode(AUTOMATIC);
+
+    Serial.println("Awake!");
 }
 
 void loop() {
@@ -44,12 +46,8 @@ void loop() {
     sendMSP(MSP_ATTITUDE, data, 0);
     double pitch = readPitch();
 
-    if (pitch < PidSetpoint + 1.5 && pitch > PidSetpoint - 1.5) {
-      pitch = PidSetpoint;
-      digitalWrite(LED_BUILTIN, LOW);
-    }
-    else {
-       digitalWrite(LED_BUILTIN, HIGH);
+    if (pitch > PidSetpoint + 70 || pitch < PidSetpoint - 70) {
+      stop();
     }
 
     PidInput = pitch;
@@ -57,7 +55,8 @@ void loop() {
     myPID.Compute();
     updateMotion(PidOutput);
 
-    Serial.println("PidInput: " + String(PidInput) + ", PidOutput: " + String(PidOutput));
+    //Serial.println("PidInput: " + String(PidInput) + ", PidOutput: " + String(PidOutput));
+    //Serial.println(String(PidInput) + "," + String(PidOutput) + "," + (millis() - lastLoopStartTime));
 }
 
 // + -> - 255
@@ -66,8 +65,8 @@ void updateMotion(double value)
   value = min(255, max(-255, value));
 
   if (value == 0) {
-      analogWrite(MOTOR_FORWARD, 255);
-      analogWrite(MOTOR_REVERSE, 255);
+      analogWrite(MOTOR_FORWARD, 128);
+      analogWrite(MOTOR_REVERSE, 128);
   }
   else if (value > 0) {
       value = map(value, 0, 255, MIN_MOTOR, 255);
@@ -98,14 +97,23 @@ void sendMSP(uint8_t cmd, uint8_t *data, uint8_t n_bytes) {
 }
 
 double readPitch() {
-    delay(100);
-
     byte count = 0;
 
-    int16_t roll;
-    int16_t pitch;
-    int16_t yaw;
+    int16_t roll = 0;
+    int16_t pitch = 0;
+    int16_t yaw = 0;
 
+    // Descard everything until next '$'
+    while (mspSerial.peek() != '$') {
+      mspSerial.read();
+      delay(1);
+    }
+
+    // Full altitude message is 12 bytes.
+    while(mspSerial.available() < 12) {
+    }
+
+    // Read the rest.
     while (mspSerial.available()) {
         count += 1;
         byte c = mspSerial.read();
@@ -138,5 +146,11 @@ double readPitch() {
     }
 
     return pitch / 10.0;
+}
+
+void stop() {
+    analogWrite(MOTOR_FORWARD, 0);
+    analogWrite(MOTOR_REVERSE, 0);
+    while(1);
 }
 

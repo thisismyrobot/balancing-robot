@@ -60,7 +60,7 @@ class MultiWii:
 
 
     """Class initialization"""
-    def __init__(self, serPort):
+    def __init__(self, serPort, baud=115200):
 
         """Global variables of data"""
         self.PIDcoef = {'rp':0,'ri':0,'rd':0,'pp':0,'pi':0,'pd':0,'yp':0,'yi':0,'yd':0}
@@ -78,7 +78,7 @@ class MultiWii:
 
         self.ser = serial.Serial()
         self.ser.port = serPort
-        self.ser.baudrate = 115200
+        self.ser.baudrate = baud
         self.ser.bytesize = serial.EIGHTBITS
         self.ser.parity = serial.PARITY_NONE
         self.ser.stopbits = serial.STOPBITS_ONE
