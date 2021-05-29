@@ -14,12 +14,12 @@
 #define MSP_ATTITUDE 108
 #define MOTOR_FORWARD 5
 #define MOTOR_REVERSE 6
-#define MIN_MOTOR 60
+#define MIN_MOTOR 30  //3s
 
 double PidSetpoint;
 double PidInput;
 double PidOutput;
-PID myPID(&PidInput, &PidOutput, &PidSetpoint, 10, 1, 0, DIRECT);
+PID myPID(&PidInput, &PidOutput, &PidSetpoint, 4, 10, 0, DIRECT);
 
 SoftwareSerial mspSerial(3, 2); // RX TX
 
@@ -33,8 +33,10 @@ void setup() {
     Serial.begin(115200);
 
     myPID.SetOutputLimits(-255, 255);
-    PidSetpoint = -2;
+    PidSetpoint = -1;
     myPID.SetMode(AUTOMATIC);
+
+    delay(3000);
 
     Serial.println("Awake!");
 }
