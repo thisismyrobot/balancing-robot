@@ -14,12 +14,14 @@
 #define MSP_ATTITUDE 108
 #define MOTOR_FORWARD 5
 #define MOTOR_REVERSE 6
-#define MIN_MOTOR 30  //3s
+#define MIN_MOTOR 30  // 3S battery
+
+unsigned long lastLoopStartTime;
 
 double PidSetpoint;
 double PidInput;
 double PidOutput;
-PID myPID(&PidInput, &PidOutput, &PidSetpoint, 4, 10, 0, DIRECT);
+PID myPID(&PidInput, &PidOutput, &PidSetpoint, 4, 2, 0, DIRECT);
 
 SoftwareSerial mspSerial(3, 2); // RX TX
 
@@ -29,7 +31,7 @@ void setup() {
     pinMode(MOTOR_FORWARD, OUTPUT);
     pinMode(MOTOR_REVERSE, OUTPUT);
 
-    mspSerial.begin(9600);
+    mspSerial.begin(38400);
     Serial.begin(115200);
 
     myPID.SetOutputLimits(-255, 255);
@@ -42,6 +44,8 @@ void setup() {
 }
 
 void loop() {
+    lastLoopStartTime = millis();
+
     uint8_t datad = 0;
     uint8_t *data = &datad;
 
@@ -58,7 +62,7 @@ void loop() {
     updateMotion(PidOutput);
 
     //Serial.println("PidInput: " + String(PidInput) + ", PidOutput: " + String(PidOutput));
-    //Serial.println(String(PidInput) + "," + String(PidOutput) + "," + (millis() - lastLoopStartTime));
+    Serial.println(String(PidInput) + "," + String(PidOutput) + "," + (millis() - lastLoopStartTime));
 }
 
 // + -> - 255
