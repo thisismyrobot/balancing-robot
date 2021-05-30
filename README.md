@@ -2,9 +2,9 @@
 
 Using a BetaFlight-equipped flight controller to give the orientation.
 
-## Hardware - V1
+## Hardware - Verson 1
 
-![Robot](build 1.jpg?raw=true "Robot")
+![](build%201.jpg)
 
 ### HappyModel SP Racing F3 EVO Brushed Micro FC
 
