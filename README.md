@@ -6,13 +6,9 @@ Using a BetaFlight-equipped flight controller to give the orientation.
 
 ![](build%201.jpg)
 
-### HappyModel SP Racing F3 EVO Brushed Micro FC
-
- * Running BetaFlight 3.1.7 with minimal configuration.
-
-### Solarbotics L293D Secret Motor Driver
-
-### Arduino Nano
+ * HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration.
+ * Solarbotics L293D Secret Motor Driver
+ * Arduino Nano
 
 # What makes a good balancing robot
 
