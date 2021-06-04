@@ -2,7 +2,19 @@
 
 Using a BetaFlight-equipped flight controller to give the orientation.
 
+## Hardware - Verson 2
+
+WIP
+
+ * HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration except for fast serial response.
+ * 2 x Solarbotics L293D Secret Motor Driver
+ * Arduino Nano
+ * 2 x 48.75:1 DC motor w/wheel, 3-12V (search for "Arduino DC Motor with Wheel and Rubber Tyres")
+ * Pololu 5V, 2.5A Step-Down Voltage Regulator D24V22F5
+
 ## Hardware - Verson 1
+
+See Tag 1.0
 
 ![](build%201.jpg)
 
@@ -89,8 +101,8 @@ motors.
 ## Tuning approach
 
 The usual, tune P, the I, then D. Some people say for balancing robots to go
-with zero I, some go with I = 10x P. YMMV. D is nearly always a 10th or 100th
-of P.
+with zero I, some go with I = 10x P. YMMV. D is nearly always a 100th or
+1000th of P.
 
 ## Fast PID control loop time
 
