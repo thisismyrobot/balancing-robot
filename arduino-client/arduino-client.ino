@@ -11,10 +11,26 @@
 #include <SoftwareSerial.h>
 #include <PID_v1.h>
 
-#define MSP_ATTITUDE 108
+// Robot configuration and characteristics
+#define BALANCE_ZERO_ANGLE -1.0  // readPitch() = 0 when this is correct and robot balanced.
+#define BATTERY_VOLTAGE 7.4  // TODO: Read live.
+#define MIN_MOTOR_VOLTS 1.5  // Tune per your DC motor.
+
+// Arduino wiring configuration.
 #define MOTOR_FORWARD 5
 #define MOTOR_REVERSE 6
-#define MIN_MOTOR 30  // 3S battery
+#define SERIAL_RX 3
+#define SERIAL_TX 2
+
+// PID configuration.
+#if BATTERY == BATTERY_2S
+  #define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
+#elif BATTERY == BATTERY_3S
+  #define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
+#endif
+
+// Multi-Wii commands.
+#define MSP_ATTITUDE 108
 
 unsigned long lastLoopStartTime;
 
@@ -23,7 +39,7 @@ double PidInput;
 double PidOutput;
 PID myPID(&PidInput, &PidOutput, &PidSetpoint, 4, 2, 0, DIRECT);
 
-SoftwareSerial mspSerial(3, 2); // RX TX
+SoftwareSerial mspSerial(SERIAL_RX, SERIAL_TX);
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -31,11 +47,15 @@ void setup() {
     pinMode(MOTOR_FORWARD, OUTPUT);
     pinMode(MOTOR_REVERSE, OUTPUT);
 
-    mspSerial.begin(38400);
     Serial.begin(115200);
+    Serial.println("Setting up...");
+
+    // Let the F3 board settle before attempting to connect.
+    delay(3000);
+
+    mspSerial.begin(38400);
 
     myPID.SetOutputLimits(-255, 255);
-    PidSetpoint = -1;
     myPID.SetMode(AUTOMATIC);
 
     delay(3000);
@@ -46,14 +66,15 @@ void setup() {
 void loop() {
     lastLoopStartTime = millis();
 
-    uint8_t datad = 0;
-    uint8_t *data = &datad;
-
-    sendMSP(MSP_ATTITUDE, data, 0);
+    sendMSP(MSP_ATTITUDE, 0);
     double pitch = readPitch();
 
-    if (pitch > PidSetpoint + 70 || pitch < PidSetpoint - 70) {
+    if (pitch > 30 || pitch < 30) {
       stop();
+    }
+
+    if (pitch > -1 && pitch < 1) {
+      pitch = 0;
     }
 
     PidInput = pitch;
@@ -68,7 +89,7 @@ void loop() {
 // + -> - 255
 void updateMotion(double value)
 {
-  value = min(255, max(-255, value));
+  value = constrain(value, -255, 255);
 
   if (value == 0) {
       analogWrite(MOTOR_FORWARD, 128);
@@ -88,7 +109,7 @@ void updateMotion(double value)
   }
 }
 
-void sendMSP(uint8_t cmd, uint8_t *data, uint8_t n_bytes) {
+void sendMSP(uint8_t cmd, uint8_t n_bytes) {
 
     uint8_t checksum = 0;
 
@@ -102,6 +123,7 @@ void sendMSP(uint8_t cmd, uint8_t *data, uint8_t n_bytes) {
     mspSerial.write(checksum);
 }
 
+// Return a relative pitch, accounting for the configured balance point offset.
 double readPitch() {
     byte count = 0;
 
@@ -151,12 +173,14 @@ double readPitch() {
         }
     }
 
-    return pitch / 10.0;
+    return (pitch / 10.0) - BALANCE_ZERO_ANGLE;
 }
 
 void stop() {
     analogWrite(MOTOR_FORWARD, 0);
     analogWrite(MOTOR_REVERSE, 0);
-    while(1);
+    while(1) {
+      delay(1);
+    }
 }
 
