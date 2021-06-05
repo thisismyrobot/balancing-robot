@@ -4,10 +4,7 @@
  *  Board: Arduino Nano.
  *  Extra Libraries: PID
  *
- *  Pin D2 connected to RX1 on drone micro controller.
- *  Pin D3 connected to RX on drone micro controller.
- *
-  */
+*/
 #include <SoftwareSerial.h>
 #include <PID_v1.h>
 
