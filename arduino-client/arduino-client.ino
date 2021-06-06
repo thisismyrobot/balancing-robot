@@ -9,10 +9,10 @@
 #include <PID_v1.h>
 
 // Robot configuration and characteristics
-#define BALANCE_ZERO_ANGLE 0  // readPitch() = 0 when this is correct and robot balanced.
+#define BALANCE_ZERO_ANGLE -1.3  // readPitch() = 0 when this is correct and robot balanced.
 #define BATTERY_VOLTAGE 7.4  // TODO: Read live.
 #define MIN_MOTOR_VOLTS 1.5  // Tune per your DC motor.
-#define ANGLE_DEADZONE 0.5 // +/- this pitch value is considered zero.
+#define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
 #define ANGLE_FALLEN 30
 
 // Arduino wiring configuration.
@@ -25,9 +25,9 @@
 #define MSP_ATTITUDE 108
 
 // PID configuration.
-#define P 4
+#define P 50
 #define I 0
-#define D 0
+#define D 0.2
 #define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
 
 // Timing.
