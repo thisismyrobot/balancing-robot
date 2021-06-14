@@ -9,7 +9,6 @@
 #include <PID_v1.h>
 
 // Robot configuration and characteristics
-#define BALANCE_ZERO_ANGLE -1.3  // readPitch() = 0 when this is correct and robot balanced.
 #define BATTERY_VOLTAGE 7.4  // TODO: Read live.
 #define MIN_MOTOR_VOLTS 1.5  // Tune per your DC motor.
 #define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
@@ -20,6 +19,7 @@
 #define MOTOR_REVERSE 6
 #define SERIAL_RX 3
 #define SERIAL_TX 2
+#define TUNING_POT A7
 
 // Multi-Wii commands.
 #define MSP_ATTITUDE 108
@@ -42,11 +42,14 @@ PID myPID(&PidInput, &PidOutput, &PidSetpoint, P, I, D, DIRECT);
 
 SoftwareSerial mspSerial(SERIAL_RX, SERIAL_TX);
 
+// Subtracted from read pitch angle to get zero = stable robot.
+double balanceZeroAngle;
+
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
-
     pinMode(MOTOR_FORWARD, OUTPUT);
     pinMode(MOTOR_REVERSE, OUTPUT);
+    pinMode(TUNING_POT, INPUT);
 
     myPID.SetOutputLimits(-255, 255);
     myPID.SetMode(AUTOMATIC);
@@ -54,11 +57,13 @@ void setup() {
     Serial.begin(115200);
     Serial.println("Setting up...");
 
-    // Let the F3 board settle before attempting to connect.
-    delay(3000);
-    mspSerial.begin(38400);
+    // Grab the Pot value for tuning.
+    balanceZeroAngle = tuningValue(-3, 3);
+    Serial.println("Zero angle = " + String(balanceZeroAngle));
 
-    delay(1000);
+    // Let the F3 board settle before attempting to connect.
+    delay(5000);
+    mspSerial.begin(38400);
 
     timingStart = millis();
     Serial.println("Awake!");
@@ -181,7 +186,7 @@ double readPitch() {
         }
     }
 
-    return (pitch / 10.0) - BALANCE_ZERO_ANGLE;
+    return (pitch / 10.0) - balanceZeroAngle;
 }
 
 void stop() {
@@ -190,5 +195,14 @@ void stop() {
     while(1) {
       delay(1);
     }
+}
+
+double tuningValue(double lowBound, double highBound) {
+  double rawValue = analogRead(TUNING_POT);
+  return map(rawValue, 1023, 0, lowBound, highBound);
+}
+
+double map(double x, double in_min, double in_max, double out_min, double out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
