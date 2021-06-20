@@ -9,8 +9,8 @@
 #include <PID_v1.h>
 
 // Robot configuration and characteristics
-#define BATTERY_VOLTAGE 7.4  // TODO: Read live.
-#define MIN_MOTOR_VOLTS 1.5  // Tune per your DC motor.
+#define BATTERY_VOLTAGE 8.0  // TODO: Read live.
+#define MIN_MOTOR_VOLTS 2.0  // Tune per your DC motor.
 #define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
 #define ANGLE_FALLEN 30
 
@@ -25,7 +25,7 @@
 #define MSP_ATTITUDE 108
 
 // PID configuration.
-#define P 50
+#define P 30
 #define I 0
 #define D 0.2
 #define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
@@ -43,7 +43,7 @@ PID myPID(&PidInput, &PidOutput, &PidSetpoint, P, I, D, DIRECT);
 SoftwareSerial mspSerial(SERIAL_RX, SERIAL_TX);
 
 // Subtracted from read pitch angle to get zero = stable robot.
-double balanceZeroAngle;
+double balanceZeroAngle = -1.0;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -58,8 +58,9 @@ void setup() {
     Serial.println("Setting up...");
 
     // Grab the Pot value for tuning.
-    balanceZeroAngle = tuningValue(-3, 3);
-    Serial.println("Zero angle = " + String(balanceZeroAngle));
+    double tunedP = tuningValue(10, 40);
+    myPID.SetTunings(tunedP, I, D);
+    Serial.println("Tuned P: " + String(tunedP));
 
     // Let the F3 board settle before attempting to connect.
     delay(5000);
@@ -104,8 +105,8 @@ void updateMotion(double value)
   value = constrain(value, -255, 255);
 
   if (value == 0) {
-      analogWrite(MOTOR_FORWARD, 128);
-      analogWrite(MOTOR_REVERSE, 128);
+      analogWrite(MOTOR_FORWARD, 255);
+      analogWrite(MOTOR_REVERSE, 255);
   }
   else if (value > 0) {
       value = map(value, 0, 255, MIN_MOTOR, 255);
