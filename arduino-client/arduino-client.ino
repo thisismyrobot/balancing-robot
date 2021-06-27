@@ -25,8 +25,8 @@
 #define MSP_ATTITUDE 108
 
 // PID configuration.
-#define P 8.45
-#define I 0
+#define P 8
+#define I 38
 #define D 0
 #define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
 
@@ -58,9 +58,9 @@ void setup() {
     Serial.println("Setting up...");
 
     // Grab the Pot value for tuning.
-    double tunedP = tuningValue(10, 40);
-    myPID.SetTunings(tunedP, I, D);
-    Serial.println("Tuned P: " + String(tunedP));
+    //double tunedP = tuningValue(5, 15);
+    //myPID.SetTunings(tunedP, I, D);
+    //Serial.println("Tuned P: " + String(tunedP));
 
     // Let the F3 board settle before attempting to connect.
     delay(5000);
@@ -74,6 +74,8 @@ void loop() {
     sendMSP(MSP_ATTITUDE, 0);
     double pitch = readPitch();
     
+    //Serial.println(String(pitch));
+
     if (pitch > ANGLE_FALLEN || pitch < -ANGLE_FALLEN) {
       stop();
     }
