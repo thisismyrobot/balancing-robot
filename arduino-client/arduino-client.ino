@@ -9,10 +9,10 @@
 #include <PID_v1.h>
 
 // Robot configuration and characteristics
-#define BATTERY_VOLTAGE 8.0  // TODO: Read live.
-#define MIN_MOTOR_VOLTS 2.0  // Tune per your DC motor.
+#define BATTERY_VOLTAGE 12.0  // TODO: Read live.
+#define MIN_MOTOR_VOLTS 1.5  // Tune per your DC motor.
 #define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
-#define ANGLE_FALLEN 30
+#define ANGLE_FALLEN 40
 
 // Arduino wiring configuration.
 #define MOTOR_FORWARD 5
@@ -25,9 +25,9 @@
 #define MSP_ATTITUDE 108
 
 // PID configuration.
-#define P 30
+#define P 8.45
 #define I 0
-#define D 0.2
+#define D 0
 #define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
 
 // Timing.
@@ -43,7 +43,7 @@ PID myPID(&PidInput, &PidOutput, &PidSetpoint, P, I, D, DIRECT);
 SoftwareSerial mspSerial(SERIAL_RX, SERIAL_TX);
 
 // Subtracted from read pitch angle to get zero = stable robot.
-double balanceZeroAngle = -1.0;
+double balanceZeroAngle = -2.0;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -73,13 +73,17 @@ void setup() {
 void loop() {
     sendMSP(MSP_ATTITUDE, 0);
     double pitch = readPitch();
-
+    
     if (pitch > ANGLE_FALLEN || pitch < -ANGLE_FALLEN) {
       stop();
     }
 
     if (pitch > -ANGLE_DEADZONE && pitch < ANGLE_DEADZONE) {
       pitch = 0;
+      digitalWrite(LED_BUILTIN, HIGH);
+    }
+    else {
+      digitalWrite(LED_BUILTIN, LOW);   
     }
 
     PidInput = pitch;
