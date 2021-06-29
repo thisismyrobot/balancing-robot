@@ -1,20 +1,32 @@
 # Balancing robot
 
-Using a BetaFlight-equipped flight controller to give the orientation.
+Using a BetaFlight-equipped flight controller to give the orientation and an
+Arduino Nano for control.
+
+End goal is the Wheelie Boy from The Peripheral.
 
 ## Hardware - Verson 2
 
-WIP
+See [Tag 2.0](https://github.com/thisismyrobot/balancing-robot/releases/tag/2.0)
+
+![](build%202.gif)
 
  * HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration except for fast serial response.
  * 2 x Solarbotics L293D Secret Motor Driver
  * Arduino Nano
  * 2 x 48.75:1 DC motor w/wheel, 3-12V (search for "Arduino DC Motor with Wheel and Rubber Tyres")
  * Pololu 5V, 2.5A Step-Down Voltage Regulator D24V22F5
+ * 3S LiPo (450mAh 45C)
+
+### Thoughts
+
+Pretty much balances. Next version will use encoders to get better motor speed
+control and also distance measurement so I can start correcting for it
+creeping.
 
 ## Hardware - Verson 1
 
-See Tag 1.0
+See [Tag 1.0](https://github.com/thisismyrobot/balancing-robot/releases/tag/1.0)
 
 ![](build%201.jpg)
 
@@ -25,15 +37,23 @@ See Tag 1.0
  * Pololu 5V, 2.5A Step-Down Voltage Regulator D24V22F5
  * 2S and 3S LiPos to test (3S better)
 
-# What makes a good balancing robot
+### Thoughts
 
-## Height/centre of mass/moment of inertia
+Too short to even start tuning PID, but it was a good proof of concept of
+using the drone controller for orientation.
+
+## What (I think) makes a good balancing robot
+
+Trying to describe this without a formula. It's close to correct but I will
+keep updating as I learn more.
+
+### Height/centre of mass/moment of inertia
 
 Moving and concentrating mass towards the top of the robot will give the
 control system more time to react to tipping and reduce the power requirements
 of the motors to regain balance.
 
-## Centre of Mass
+#### Centre of Mass
 
 The Centre of Mass of an object is the average position of the items within
 it, weighted by their mass.
@@ -41,7 +61,7 @@ it, weighted by their mass.
 For the purposes of approximation, the Centre of Mass of our robot is it's
 balance point along its length when laying on it's side.
 
-## Torque Arm
+### Torque Arm
 
 When a solid object has a force put upon it, and that force is not directly
 pointing at the Centre of Mass, the object will both move and be torqued
@@ -52,7 +72,7 @@ will contribute to rotation and less to moving. 100% of the force will
 contribute to rotation when the force is acting at 90 degrees to the Torque
 Arm.
 
-### Moment of Inertia
+#### Moment of Inertia
 
 The Moment of Inertia of an object is its resistance to acceleration around a
 pivot, based on its mass and the distribution of its mass compared to the
@@ -107,7 +127,7 @@ with zero I, some go with I = 10x P. YMMV. D is nearly always a 100th or
 ## Fast PID control loop time
 
 I got now meaningful balancing performance before hitting over 150Hz loop
-time. At 10Hz it was hopeless.
+time (currently 192 Hz). At 10Hz it was hopeless.
 
 I don't have a good external reference but 1ms loop times (so 1000Hz) are
 successful in https://www.youtube.com/watch?v=TN6u-D992sw
