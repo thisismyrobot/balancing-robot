@@ -5,6 +5,9 @@ Arduino Nano for control.
 
 End goal is the Wheelie Boy from The Peripheral.
 
+This is an educational (for myself) project but I want to share my steps
+towards achieving (or not) this goal.
+
 ## Hardware - Verson 2
 
 See [Tag 2.0](https://github.com/thisismyrobot/balancing-robot/releases/tag/2.0)
