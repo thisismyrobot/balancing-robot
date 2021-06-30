@@ -1,0 +1,45 @@
+# diff all
+# Betaflight / SPRACINGF3EVO 3.1.7 Apr  3 2017 / 22:28:08 (e1c4b5c)
+defaults
+
+feature -VBAT
+feature -CURRENT_METER
+feature -RSSI_ADC
+feature -BLACKBOX
+feature -TRANSPONDER
+feature -SDCARD
+feature SOFTSERIAL
+serial 0 1 38400 57600 0 115200
+set serial_update_rate_hz = 1000
+profile 0
+
+rateprofile 0
+rateprofile 0
+
+rateprofile 1
+
+rateprofile 2
+
+rateprofile 0
+profile 1
+
+rateprofile 0
+rateprofile 0
+
+rateprofile 1
+
+rateprofile 2
+
+rateprofile 0
+profile 2
+
+rateprofile 0
+rateprofile 0
+
+rateprofile 1
+
+rateprofile 2
+
+rateprofile 0
+profile 0
+save
