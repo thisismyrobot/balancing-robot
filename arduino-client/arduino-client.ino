@@ -4,75 +4,115 @@
  *  Board: Arduino Nano.
  *  Extra Libraries: PID
  *
- *  Pin D2 connected to RX1 on drone micro controller.
- *  Pin D3 connected to RX on drone micro controller.
- *
-  */
+*/
 #include <SoftwareSerial.h>
 #include <PID_v1.h>
 
-#define MSP_ATTITUDE 108
+// Robot configuration and characteristics
+#define BATTERY_VOLTAGE 12.0  // TODO: Read live.
+#define MIN_MOTOR_VOLTS 1.5  // Tune per your DC motor.
+#define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
+#define ANGLE_FALLEN 40
+
+// Arduino wiring configuration.
 #define MOTOR_FORWARD 5
 #define MOTOR_REVERSE 6
-#define MIN_MOTOR 30  // 3S battery
+#define SERIAL_RX 3
+#define SERIAL_TX 2
+#define TUNING_POT A7
 
-unsigned long lastLoopStartTime;
+// Multi-Wii commands.
+#define MSP_ATTITUDE 108
+
+// PID configuration.
+#define P 8.0
+#define I 38.0
+#define D 1.0
+#define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
+
+// Timing.
+#define DEBUG_LOOPS 1000
+unsigned long timingStart;
+int loops = 0;
 
 double PidSetpoint;
 double PidInput;
 double PidOutput;
-PID myPID(&PidInput, &PidOutput, &PidSetpoint, 4, 2, 0, DIRECT);
+PID myPID(&PidInput, &PidOutput, &PidSetpoint, P, I, D, DIRECT);
 
-SoftwareSerial mspSerial(3, 2); // RX TX
+SoftwareSerial mspSerial(SERIAL_RX, SERIAL_TX);
+
+// Subtracted from read pitch angle to get zero = stable robot.
+double balanceZeroAngle = -2.0;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
-
     pinMode(MOTOR_FORWARD, OUTPUT);
     pinMode(MOTOR_REVERSE, OUTPUT);
-
-    mspSerial.begin(38400);
-    Serial.begin(115200);
+    pinMode(TUNING_POT, INPUT);
 
     myPID.SetOutputLimits(-255, 255);
-    PidSetpoint = -1;
     myPID.SetMode(AUTOMATIC);
 
-    delay(3000);
+    Serial.begin(115200);
+    Serial.println("Setting up...");
 
+    // Grab the Pot value for tuning.
+    balanceZeroAngle = tuningValue(-4, 4);
+    //myPID.SetTunings(P, I, tunedD);
+    Serial.println("Balance 0: " + String(balanceZeroAngle));
+
+    // Let the F3 board settle before attempting to connect.
+    delay(5000);
+    mspSerial.begin(38400);
+
+    timingStart = millis();
     Serial.println("Awake!");
 }
 
 void loop() {
-    lastLoopStartTime = millis();
-
-    uint8_t datad = 0;
-    uint8_t *data = &datad;
-
-    sendMSP(MSP_ATTITUDE, data, 0);
+    sendMSP(MSP_ATTITUDE, 0);
     double pitch = readPitch();
+    
+    //Serial.println(String(pitch));
 
-    if (pitch > PidSetpoint + 70 || pitch < PidSetpoint - 70) {
+    if (pitch > ANGLE_FALLEN || pitch < -ANGLE_FALLEN) {
       stop();
     }
 
+    if (pitch > -ANGLE_DEADZONE && pitch < ANGLE_DEADZONE) {
+      pitch = 0;
+      digitalWrite(LED_BUILTIN, HIGH);
+    }
+    else {
+      digitalWrite(LED_BUILTIN, LOW);   
+    }
+
     PidInput = pitch;
-    
+
     myPID.Compute();
     updateMotion(PidOutput);
 
-    //Serial.println("PidInput: " + String(PidInput) + ", PidOutput: " + String(PidOutput));
-    Serial.println(String(PidInput) + "," + String(PidOutput) + "," + (millis() - lastLoopStartTime));
+    loops = loops + 1;
+    if (loops > DEBUG_LOOPS) {
+      unsigned long duration = millis() - timingStart;
+      if (duration > 0) {
+        unsigned long rate = (DEBUG_LOOPS * 1000L) / duration;
+        Serial.println("Rate: " + String(rate) + "Hz, Pitch: " + String(pitch));
+      }
+      loops = 0;
+      timingStart = millis();
+    }
 }
 
 // + -> - 255
 void updateMotion(double value)
 {
-  value = min(255, max(-255, value));
+  value = constrain(value, -255, 255);
 
   if (value == 0) {
-      analogWrite(MOTOR_FORWARD, 128);
-      analogWrite(MOTOR_REVERSE, 128);
+      analogWrite(MOTOR_FORWARD, 255);
+      analogWrite(MOTOR_REVERSE, 255);
   }
   else if (value > 0) {
       value = map(value, 0, 255, MIN_MOTOR, 255);
@@ -88,7 +128,7 @@ void updateMotion(double value)
   }
 }
 
-void sendMSP(uint8_t cmd, uint8_t *data, uint8_t n_bytes) {
+void sendMSP(uint8_t cmd, uint8_t n_bytes) {
 
     uint8_t checksum = 0;
 
@@ -102,6 +142,7 @@ void sendMSP(uint8_t cmd, uint8_t *data, uint8_t n_bytes) {
     mspSerial.write(checksum);
 }
 
+// Return a relative pitch, accounting for the configured balance point offset.
 double readPitch() {
     byte count = 0;
 
@@ -109,15 +150,16 @@ double readPitch() {
     int16_t pitch = 0;
     int16_t yaw = 0;
 
+    // Wait for anything.
+    while (!mspSerial.available());
+
     // Descard everything until next '$'
     while (mspSerial.peek() != '$') {
       mspSerial.read();
-      delay(1);
     }
 
     // Full altitude message is 12 bytes.
-    while(mspSerial.available() < 12) {
-    }
+    while(mspSerial.available() < 9);
 
     // Read the rest.
     while (mspSerial.available()) {
@@ -151,12 +193,23 @@ double readPitch() {
         }
     }
 
-    return pitch / 10.0;
+    return (pitch / 10.0) - balanceZeroAngle;
 }
 
 void stop() {
     analogWrite(MOTOR_FORWARD, 0);
     analogWrite(MOTOR_REVERSE, 0);
-    while(1);
+    while(1) {
+      delay(1);
+    }
+}
+
+double tuningValue(double lowBound, double highBound) {
+  double rawValue = analogRead(TUNING_POT);
+  return map(rawValue, 1023, 0, lowBound, highBound);
+}
+
+double map(double x, double in_min, double in_max, double out_min, double out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
