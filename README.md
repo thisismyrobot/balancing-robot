@@ -9,7 +9,7 @@ End goal is the Wheelie Boy from The Peripheral.
 
 See [Tag 2.0](https://github.com/thisismyrobot/balancing-robot/releases/tag/2.0)
 
-![](build%202.gif) ![](build%202.jpg)
+![](doc/build%202.gif) ![](doc/build%202.jpg)
 
  * HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration except for fast serial response.
  * 2 x Solarbotics L293D Secret Motor Driver
@@ -28,7 +28,7 @@ creeping.
 
 See [Tag 1.0](https://github.com/thisismyrobot/balancing-robot/releases/tag/1.0)
 
-![](build%201.jpg)
+![](doc/build%201.jpg)
 
  * HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration.
  * Solarbotics L293D Secret Motor Driver
