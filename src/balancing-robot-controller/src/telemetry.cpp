@@ -43,13 +43,12 @@ void _telemetry(void *parameters) {
 
   for(;;){
 
-    int count = *telemetryData.count;
-
-    // Stream.
-    Serial.println("Count:" + String(count));
+    Serial.println("Count:" + String(*telemetryData.count));
 
     _packer.clear();
-    _packer.to_array(count);
+    _packer.to_array(
+      *telemetryData.count
+    );
 
     udp.beginPacket(target_ip, target_port);
     udp.write(_packer.data(), _packer.size());
