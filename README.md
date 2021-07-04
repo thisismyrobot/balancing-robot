@@ -174,3 +174,14 @@ possible.
 Consider raising P by the drop (%) in battery voltage, and vice versa. Motor
 voltage is proportional to motor speed so this will help maintain level
 performance as a battery sags.
+
+# Some notes on motors
+
+I am trying different motors as I progress and I'll log what I know about them
+here, performance-wise.
+
+| Motor model | Robot version(s) | Stall Torque | No Load Speed |
+| --- | --- | --- | --- |
+| DG01D-A130GEARMOTOR | 1 + 2 | 0.8kg/cm @ 4.5V | 180 RPM @ 4.5V |
+| DG01D-E | 3? | 0.8kg/cm @ 4.5V | 180 RPM @ 4.5V |
+| FS90R | 4? Wheelie Boy? | 1.3kg/cm @ 4.8V | 100 RPM @ 4.8V |
