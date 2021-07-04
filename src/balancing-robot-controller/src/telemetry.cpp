@@ -6,7 +6,7 @@
 #include "network.h"
 
 
-// The UI task runs on the non-default core 0.
+// The telemetry task runs on the non-default core 0.
 TaskHandle_t _TelemetryCoreZeroTask;
 MsgPack::Packer _packer;
 
