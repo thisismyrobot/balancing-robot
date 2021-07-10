@@ -2,14 +2,14 @@ use <Toysans-Xe5d.ttf>
 
 print = false;
 
-$fn = print ? 250 : 50;
+$fn = print ? 200 : 100;
 
 hub_width = 26;
 hub_diam = 51.6;
 
 tire_diam = 110;
 tire_width = 50;
-tire_soften = 5;
+tire_soften = 4;
 
 
 module hub()
@@ -17,18 +17,25 @@ module hub()
     cylinder(r=hub_diam / 2, h=hub_width);
 }
 
-module model()
-{   
-    letters = "Wheelie Boy";
-    chars = len(letters);
+module letter(rotation, letter)
+{
     font_size = (tire_diam - hub_diam) / 4;
     tire_centre = (hub_diam / 2) + ((tire_diam - hub_diam) / 4);
-    
-    for (c =[0:chars])
-    {
-        rotate([0, 0, -c*15]) translate([0, tire_centre, 0]) linear_extrude(1) text(letters[c], font_size, "ToySans", valign="center", halign="center");
-    }
+    rotate([0, 0, -rotation]) translate([0, tire_centre - (font_size / 2), -1]) linear_extrude(2) text(letter, font_size, "ToySans", halign="center");
+}
 
+module model()
+{   
+    letter(0, "W");
+    letter(25, "h");
+    letter(45, "e");
+    letter(64, "e");
+    letter(81, "l");
+    letter(94, "i");
+    letter(110, "e");
+    letter(150, "B");
+    letter(173, "o");
+    letter(194, "y");
 }
 
 module rubber()
