@@ -9,8 +9,8 @@
 #include <HardwareSerial.h>
 #include "src/telemetry.h"
 
-// https://heltec-automation-docs.readthedocs.io/en/latest/esp32/frequently_asked_questions.html#vext-control
-#define F3_ENABLE_GPIO 21
+#define ENABLE_GPIO 13
+#define LED_GPIO 25
 
 int watchdog = 0;
 int rate = 0;
@@ -30,6 +30,15 @@ TelemetryData_t telemetryData = {
 HardwareSerial F3Serial(1);
 
 void setup() {
+    setupPins();
+
+    while(!enabled()) {
+        digitalWrite(LED_GPIO, LOW);
+        delay(200);
+        digitalWrite(LED_GPIO, HIGH);
+        delay(200);
+    }
+
     setupF3();
 
     startTelemetryTask((TelemetryData_t *)&telemetryData);
@@ -39,17 +48,26 @@ void loop() {
     pitch = readPitch();
 
     updateStats();
+
+    if(!enabled()) {
+        ESP.restart();
+    }
+}
+
+void setupPins() {
+    pinMode(ENABLE_GPIO, INPUT_PULLDOWN);
+    pinMode(LED_GPIO, OUTPUT);
+
+    digitalWrite(LED_GPIO, LOW);
+
+    // TODO SET MOTORS TO ZERO.
 }
 
 void setupF3() {
-    pinMode(F3_ENABLE_GPIO, OUTPUT);
-    digitalWrite(F3_ENABLE_GPIO, HIGH);
-    delay(2000);
-    digitalWrite(F3_ENABLE_GPIO, LOW);
     delay(5000);
 
     // using UART2 pins.
-    F3Serial.begin(115200, SERIAL_8N1, 16, 17);  
+    F3Serial.begin(115200, SERIAL_8N1, 16, 17);
 }
 
 void updateStats() {
@@ -83,7 +101,7 @@ double readPitch() {
 
     F3Serial.write(checksum);
     F3Serial.flush(true);  // true = TX only.
-    delay(2);  // 2ms is stable too.
+    delay(2);
 
     // Read response    
     byte count = 0;
@@ -133,4 +151,9 @@ double readPitch() {
     }
 
     return (pitch / 10.0);
+}
+
+bool enabled()
+{
+    return digitalRead(ENABLE_GPIO);
 }
