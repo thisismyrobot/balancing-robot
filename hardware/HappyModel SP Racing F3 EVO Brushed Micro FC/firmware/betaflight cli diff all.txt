@@ -9,7 +9,7 @@ feature -BLACKBOX
 feature -TRANSPONDER
 feature -SDCARD
 feature SOFTSERIAL
-serial 0 1 38400 57600 0 115200
+serial 0 1 115200 57600 0 115200
 set serial_update_rate_hz = 1000
 profile 0
 
