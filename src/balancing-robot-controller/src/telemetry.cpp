@@ -43,11 +43,10 @@ void _telemetry(void *parameters) {
 
   for(;;){
 
-    Serial.println("Count:" + String(*telemetryData.count));
-
     _packer.clear();
     _packer.to_array(
-      *telemetryData.count
+      *telemetryData.count,
+      *telemetryData.pitch
     );
 
     udp.beginPacket(target_ip, target_port);
@@ -55,6 +54,6 @@ void _telemetry(void *parameters) {
     udp.endPacket();
 
     // At least 1, otherwise the watchdog kills the task.
-    delay(500);
+    delay(100);
   }
 }

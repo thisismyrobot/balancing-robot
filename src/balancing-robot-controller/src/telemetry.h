@@ -4,6 +4,7 @@
 typedef struct Data_t
 {
     int *count;
+    double *pitch;
 } TelemetryData_t;
 
 void startTelemetryTask(TelemetryData_t *telemetryData);

@@ -15,8 +15,8 @@ def listen():
     while True:
         data = sock.recvfrom(1024)[0]
         message = msgpack.unpackb(data, use_list=False)
-        count, = message
-        print(f'Count: {count}')
+        count, pitch = message
+        print(f'Count: {count}, Pitch: {pitch}')
 
 
 if __name__ == '__main__':
