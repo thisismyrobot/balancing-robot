@@ -44,8 +44,11 @@ void _telemetry(void *parameters) {
   for(;;){
 
     _packer.clear();
+
+    // This order *must* match the order of the telemetry listener.
     _packer.to_array(
       *telemetryData.count,
+      *telemetryData.rate,
       *telemetryData.pitch
     );
 

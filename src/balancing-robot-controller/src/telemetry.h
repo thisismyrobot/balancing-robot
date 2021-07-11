@@ -4,6 +4,7 @@
 typedef struct Data_t
 {
     int *count;
+    int *rate;
     double *pitch;
 } TelemetryData_t;
 

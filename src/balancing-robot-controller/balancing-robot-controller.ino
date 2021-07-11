@@ -8,12 +8,18 @@
 #include <Arduino.h>
 #include "src/telemetry.h"
 
-int count = 0;
+int watchdog = 0;
+int rate = 0;
 double pitch = 0;
+
+const int statsUpdateMillis = 1000;
+unsigned long lastStatsUpdateMillis = 0;
+int rateLoops = 0;
 
 // Pointers to the shared data.
 TelemetryData_t telemetryData = {
-    &count,
+    &watchdog,
+    &rate,
     &pitch
 };
 
@@ -21,17 +27,27 @@ void setup() {
     // F3 Board, using UART2 pins.
     Serial2.begin(38400);
 
-    count = 100;
-
     startTelemetryTask((TelemetryData_t *)&telemetryData);
 }
 
 void loop() {
-
     pitch = readPitch();
-    
-    count += 1;
-    delay(1000);
+
+    updateStats();
+}
+
+void updateStats() {
+    unsigned long nowMillis = millis();
+    unsigned long elapsedMillis = nowMillis - lastStatsUpdateMillis;
+    if (elapsedMillis > statsUpdateMillis) {
+      watchdog++;
+      rate = rateLoops / (elapsedMillis / 1000.0);
+      
+      rateLoops = 0;
+      lastStatsUpdateMillis = nowMillis;      
+    }
+
+    rateLoops++;
 }
 
 // Return a relative pitch, accounting for the configured balance point offset.
