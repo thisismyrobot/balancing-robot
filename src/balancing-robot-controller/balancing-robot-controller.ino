@@ -2,20 +2,55 @@
  * Add https://dl.espressif.com/dl/package_esp32_index.json as an additional board manager URL.
  * Install esp32 board via the board manager (1.0.6).
  * Select Heltec_Wifi_Kit_32 as board.
- * Install the MsgPack Library (0.3.8).
+ * 
+ * Extra libraries:
+ *  - MsgPack (0.3.8)
+ *  - PID (1.2.0)
  * 
  */
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include "src/telemetry.h"
+#include <PID_v1.h>
 
+// Robot configuration and characteristics.
+#define BATTERY_VOLTAGE 12.0  // TODO: Read live.
+#define MIN_MOTOR_VOLTS 1.5  // Tune per your DC motor.
+#define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
+#define ANGLE_FALLEN 40
+#define ANGLE_CORRECTION -2.0;  // Correction to sensor reading if robot balanced.
+
+// Arduino wiring configuration.
 #define ENABLE_GPIO 13
 #define LED_GPIO 25
+// Both motors bound together for now.
+#define MOTOR_FORWARD_GPIO 14
+#define MOTOR_REVERSE_GPIO 27
 
+// PWM
+#define PWM_FREQUENCY 5000
+#define PWM_RESOLUTION 8
+#define PWM_MOTOR_FORWARD_CHANNEL 0
+#define PWM_MOTOR_REVERSE_CHANNEL 1
+
+// Multi-Wii commands.
+#define MSP_ATTITUDE 108
+
+// PID configuration.
+#define P 8.0
+#define I 38.0
+#define D 1.0
+#define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
+
+// PID instances.
+double pitchPidSetpoint;
+double pitchPidInput;
+double pitchPidOutput;
+PID pitchPid(&pitchPidInput, &pitchPidOutput, &pitchPidSetpoint, P, I, D, DIRECT);
+
+// Statistics/telemetry
 int watchdog = 0;
 int rate = 0;
-double pitch = 0;
-
 const int statsUpdateMillis = 1000;
 unsigned long lastStatsUpdateMillis = 0;
 int rateLoops = 0;
@@ -24,7 +59,7 @@ int rateLoops = 0;
 TelemetryData_t telemetryData = {
     &watchdog,
     &rate,
-    &pitch
+    &pitchPidInput
 };
 
 HardwareSerial F3Serial(1);
@@ -45,22 +80,64 @@ void setup() {
 }
 
 void loop() {
-    pitch = readPitch();
+    double pitch = readPitch();
+
+    if (pitch > ANGLE_FALLEN || pitch < -ANGLE_FALLEN) {
+        reset();
+    }
+
+    if (pitch > -ANGLE_DEADZONE && pitch < ANGLE_DEADZONE) {
+        pitch = 0;
+    }
+
+    pitchPidInput = pitch;
+
+    pitchPid.Compute();
+    updateMotion(pitchPidOutput);
 
     updateStats();
 
     if(!enabled()) {
-        ESP.restart();
+        reset();
     }
+}
+
+void updateMotion(double value)
+{
+    value = constrain(value, -255, 255);
+
+    int forwardValue = 0;
+    int reverseValue = 0;
+    
+    if (value == 0) {
+        // Active braking.
+        forwardValue = 255;
+        reverseValue = 255;
+    }
+    else if (value > 0) {
+        forwardValue = map(value, 0, 255, MIN_MOTOR, 255);
+    } 
+    else {
+        reverseValue = map(-value, 0, 255, MIN_MOTOR, 255);
+    }
+
+    ledcWrite(PWM_MOTOR_FORWARD_CHANNEL, forwardValue);
+    ledcWrite(PWM_MOTOR_REVERSE_CHANNEL, reverseValue);
 }
 
 void setupPins() {
     pinMode(ENABLE_GPIO, INPUT_PULLDOWN);
-    pinMode(LED_GPIO, OUTPUT);
 
+    pinMode(LED_GPIO, OUTPUT);
     digitalWrite(LED_GPIO, LOW);
 
-    // TODO SET MOTORS TO ZERO.
+    ledcSetup(PWM_MOTOR_FORWARD_CHANNEL, PWM_FREQUENCY, PWM_RESOLUTION);
+    ledcSetup(PWM_MOTOR_REVERSE_CHANNEL, PWM_FREQUENCY, PWM_RESOLUTION);
+    ledcAttachPin(MOTOR_FORWARD_GPIO, PWM_MOTOR_FORWARD_CHANNEL);
+    ledcAttachPin(MOTOR_REVERSE_GPIO, PWM_MOTOR_REVERSE_CHANNEL);
+
+    ledcWrite(PWM_MOTOR_FORWARD_CHANNEL, 0);
+    ledcWrite(PWM_MOTOR_REVERSE_CHANNEL, 0);
 }
 
 void setupF3() {
@@ -74,11 +151,11 @@ void updateStats() {
     unsigned long nowMillis = millis();
     unsigned long elapsedMillis = nowMillis - lastStatsUpdateMillis;
     if (elapsedMillis > statsUpdateMillis) {
-      watchdog++;
-      rate = rateLoops / (elapsedMillis / 1000.0);
-      
-      rateLoops = 0;
-      lastStatsUpdateMillis = nowMillis;      
+          watchdog++;
+          rate = rateLoops / (elapsedMillis / 1000.0);
+          
+          rateLoops = 0;
+          lastStatsUpdateMillis = nowMillis;
     }
 
     rateLoops++;
@@ -88,7 +165,7 @@ void updateStats() {
 double readPitch() {
 
     // Request Attitude
-    uint8_t cmd = 108;  // MSP_ATTITUDE
+    uint8_t cmd = MSP_ATTITUDE;
     uint8_t n_bytes = 0;
     uint8_t checksum = 0;
 
@@ -112,7 +189,7 @@ double readPitch() {
 
     // Descard everything until next '$'
     while (F3Serial.peek() != '$') {
-      F3Serial.read();
+        F3Serial.read();
     }
 
     // Full altitude message is 12 bytes.
@@ -150,10 +227,20 @@ double readPitch() {
         }
     }
 
-    return (pitch / 10.0);
+    return (pitch / 10.0) - ANGLE_CORRECTION;
+}
+
+void reset()
+{
+    ESP.restart();
 }
 
 bool enabled()
 {
     return digitalRead(ENABLE_GPIO);
+}
+
+// Arduino built-in map is integer only.
+double map(double x, double in_min, double in_max, double out_min, double out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
