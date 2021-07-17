@@ -11,6 +11,7 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include "src/telemetry.h"
+#include "src/drive.h"
 #include <PID_v1.h>
 
 // Robot configuration and characteristics.
@@ -66,6 +67,7 @@ HardwareSerial F3Serial(1);
 
 void setup() {
     setupPins();
+    setDriveParams(PWM_MOTOR_FORWARD_CHANNEL, PWM_MOTOR_REVERSE_CHANNEL, MIN_MOTOR);
 
     while(!enabled()) {
         digitalWrite(LED_GPIO, LOW);
@@ -93,36 +95,13 @@ void loop() {
     pitchPidInput = pitch;
 
     pitchPid.Compute();
-    updateMotion(pitchPidOutput);
+    setSpeed(pitchPidOutput);
 
     updateStats();
 
     if(!enabled()) {
         reset();
     }
-}
-
-void updateMotion(double value)
-{
-    value = constrain(value, -255, 255);
-
-    int forwardValue = 0;
-    int reverseValue = 0;
-    
-    if (value == 0) {
-        // Active braking.
-        forwardValue = 255;
-        reverseValue = 255;
-    }
-    else if (value > 0) {
-        forwardValue = map(value, 0, 255, MIN_MOTOR, 255);
-    } 
-    else {
-        reverseValue = map(-value, 0, 255, MIN_MOTOR, 255);
-    }
-
-    ledcWrite(PWM_MOTOR_FORWARD_CHANNEL, forwardValue);
-    ledcWrite(PWM_MOTOR_REVERSE_CHANNEL, reverseValue);
 }
 
 void setupPins() {
@@ -238,9 +217,4 @@ void reset()
 bool enabled()
 {
     return digitalRead(ENABLE_GPIO);
-}
-
-// Arduino built-in map is integer only.
-double map(double x, double in_min, double in_max, double out_min, double out_max) {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
