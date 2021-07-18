@@ -1,4 +1,5 @@
 import socket
+import time
 
 import msgpack
 
@@ -14,11 +15,11 @@ def listen():
 
     packets = 0
     while True:
-        data = sock.recvfrom(1024)[0]
+        data, (ip, port) = sock.recvfrom(1024)
         message = msgpack.unpackb(data, use_list=False)
-        count, rate, pitch = message
+        count, rate, pitch_correction, pitch, pid_pitch_output = message
         packets += 1
-        print(f'Packet: {packets}, Count: {count}, Rate: {rate}Hz, Pitch: {pitch}°')
+        print(f'IP: {ip}, Packet: {packets}, Count: {count}, Rate: {rate}Hz, Pitch Correct: {pitch_correction:.1f}°, Pitch: {pitch:.1f}°, Drive: {int(pid_pitch_output / 2.55)}%')
 
 
 if __name__ == '__main__':

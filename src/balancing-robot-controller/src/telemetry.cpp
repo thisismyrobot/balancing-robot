@@ -26,18 +26,10 @@ void _telemetry(void *parameters) {
 
     TelemetryData_t telemetryData = *((TelemetryData_t*)parameters);
 
-    // Connect.
-    Serial.begin(115200);
-    Serial.println("Telemetry task awake!");
-
     WiFi.begin(wifi_ssid, wifi_pass);
-
     while (WiFi.status() != WL_CONNECTED) {
-        Serial.println("Connecting to WiFi...");
         delay(500);
     }
-
-    Serial.println("Connected to WiFi!");
 
     WiFiUDP udp;
 
@@ -49,7 +41,9 @@ void _telemetry(void *parameters) {
         _packer.to_array(
             *telemetryData.count,
             *telemetryData.rate,
-            *telemetryData.pitch
+            *telemetryData.pitchCorrection,
+            *telemetryData.pitch,
+            *telemetryData.pitchPidOutput
         );
 
         udp.beginPacket(target_ip, target_port);

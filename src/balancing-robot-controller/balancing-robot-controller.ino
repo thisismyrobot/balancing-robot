@@ -19,7 +19,6 @@
 #define MIN_MOTOR_VOLTS 1.5  // Tune per your DC motor.
 #define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
 #define ANGLE_FALLEN 40
-#define ANGLE_CORRECTION -2.0;  // Correction to sensor reading if robot balanced.
 
 // Arduino wiring configuration.
 #define ENABLE_GPIO 13
@@ -44,7 +43,7 @@
 #define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
 
 // PID instances.
-double pitchPidSetpoint;
+double pitchPidSetpoint = 0;
 double pitchPidInput;
 double pitchPidOutput;
 PID pitchPid(&pitchPidInput, &pitchPidOutput, &pitchPidSetpoint, P, I, D, DIRECT);
@@ -56,11 +55,16 @@ const int statsUpdateMillis = 1000;
 unsigned long lastStatsUpdateMillis = 0;
 int rateLoops = 0;
 
+// Subtracted from sensor reading to get robot balanced = 0.
+double pitchCorrection = 0;
+
 // Pointers to the shared data.
 TelemetryData_t telemetryData = {
     &watchdog,
     &rate,
-    &pitchPidInput
+    &pitchCorrection,
+    &pitchPidInput,
+    &pitchPidOutput
 };
 
 HardwareSerial F3Serial(1);
@@ -69,16 +73,35 @@ void setup() {
     setupPins();
     setDriveParams(PWM_MOTOR_FORWARD_CHANNEL, PWM_MOTOR_REVERSE_CHANNEL, MIN_MOTOR);
 
+    pitchPid.SetOutputLimits(-255, 255);
+    pitchPid.SetMode(AUTOMATIC);
+
     while(!enabled()) {
         digitalWrite(LED_GPIO, LOW);
-        delay(200);
+        delay(250);
         digitalWrite(LED_GPIO, HIGH);
-        delay(200);
+        delay(250);
     }
 
     setupF3();
 
+    pitchCorrection = getAveragePitch(10);
+
     startTelemetryTask((TelemetryData_t *)&telemetryData);
+}
+
+double getAveragePitch(int loops)
+{
+    double average = 0;
+    for(int i = 0; i < loops; i++)
+    {
+        average += readPitch();
+        digitalWrite(LED_GPIO, LOW);
+        delay(150);
+        digitalWrite(LED_GPIO, HIGH);
+        delay(150);
+    }
+    return average / loops;
 }
 
 void loop() {
@@ -88,7 +111,7 @@ void loop() {
         reset();
     }
 
-    if (pitch > -ANGLE_DEADZONE && pitch < ANGLE_DEADZONE) {
+    if (abs(pitch) <= ANGLE_DEADZONE) {
         pitch = 0;
     }
 
@@ -206,7 +229,7 @@ double readPitch() {
         }
     }
 
-    return (pitch / 10.0) - ANGLE_CORRECTION;
+    return (pitch / 10.0) - pitchCorrection;
 }
 
 void reset()
