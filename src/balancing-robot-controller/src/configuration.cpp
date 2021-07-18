@@ -24,13 +24,31 @@ void _configuration(void *parameters) {
 
     Configuration_t configuration = *((Configuration_t*)parameters);
 
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+    }
+
     WiFiUDP udp;
     udp.begin(target_port);
 
-    Serial.begin(115200);
-    Serial.println("config started");
-
+    char packetBuffer[2];
     for(;;){
+        int packetSize = udp.parsePacket();
+
+        if (packetSize) {
+            int len = udp.read(packetBuffer, 2);
+            if (len > 0) {
+                packetBuffer[len] = 0;
+                if (String(packetBuffer).equals("A+"))
+                {
+                    *configuration.pitchCorrection += 0.1;
+                }
+                else if (String(packetBuffer).equals("A-"))
+                {
+                    *configuration.pitchCorrection -= 0.1;
+                }
+            }
+        }
 
         // At least 1, otherwise the watchdog kills the task.
         delay(100);

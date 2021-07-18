@@ -10,9 +10,10 @@
  */
 #include <Arduino.h>
 #include <HardwareSerial.h>
-#include "src/telemetry.h"
-#include "src/drive.h"
 #include <PID_v1.h>
+#include "src/telemetry.h"
+#include "src/configuration.h"
+#include "src/drive.h"
 
 // Robot configuration and characteristics.
 #define BATTERY_VOLTAGE 12.0  // TODO: Read live.
@@ -58,7 +59,7 @@ int rateLoops = 0;
 // Subtracted from sensor reading to get robot balanced = 0.
 double pitchCorrection = 0;
 
-// Pointers to the shared data.
+// Pointers to the shared data for telemetry and configuration.
 TelemetryData_t telemetryData = {
     &watchdog,
     &rate,
@@ -66,6 +67,11 @@ TelemetryData_t telemetryData = {
     &pitchPidInput,
     &pitchPidOutput
 };
+
+Configuration_t configuration = {
+    &pitchCorrection
+};
+
 
 HardwareSerial F3Serial(1);
 
@@ -87,6 +93,7 @@ void setup() {
 
     pitchCorrection = getAveragePitch(10);
 
+    startConfigurationTask((Configuration_t *)&configuration);
     startTelemetryTask((TelemetryData_t *)&telemetryData);
 }
 
