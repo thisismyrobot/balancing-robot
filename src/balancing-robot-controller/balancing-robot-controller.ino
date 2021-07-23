@@ -17,7 +17,7 @@
 
 // Robot configuration and characteristics.
 #define BATTERY_VOLTAGE 12.0  // TODO: Read live.
-#define MIN_MOTOR_VOLTS 1.5  // Tune per your DC motor.
+#define MIN_MOTOR_VOLTS 3  // Tune per your DC motor.
 #define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
 #define ANGLE_FALLEN 40
 
@@ -38,8 +38,8 @@
 #define MSP_ATTITUDE 108
 
 // PID configuration.
-#define P 8.0
-#define I 38.0
+#define P 30.0
+#define I 100.0
 #define D 1.0
 #define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
 
