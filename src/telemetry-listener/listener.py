@@ -17,9 +17,9 @@ def listen():
     while True:
         data, (ip, port) = sock.recvfrom(1024)
         message = msgpack.unpackb(data, use_list=False)
-        count, rate, pitch_correction, pitch, pid_pitch_output = message
+        count, rate, pitch_correction, pitch, pid_pitch_output, leftDist, rightDist = message
         packets += 1
-        print(f'IP: {ip}, Packet: {packets}, Count: {count}, Rate: {rate}Hz, Pitch Correct: {pitch_correction:.1f}°, Pitch: {pitch:.1f}°, Drive: {int(pid_pitch_output / 2.55)}%')
+        print(f'IP: {ip}, Packet: {packets}, Count: {count}, Rate: {rate}Hz, Pitch Correct: {pitch_correction:.1f}°, Pitch: {pitch:.1f}°, Drive: {int(pid_pitch_output / 2.55)}%, Left: {round(leftDist * 100, 1)}cm, Right: {round(rightDist * 100, 1)}cm')
 
 
 if __name__ == '__main__':

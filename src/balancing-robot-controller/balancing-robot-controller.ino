@@ -6,11 +6,13 @@
  * Extra libraries:
  *  - MsgPack (0.3.8)
  *  - PID (1.2.0)
+ *  - ESP32Encoder (0.5.1)
  * 
  */
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <PID_v1.h>
+#include <ESP32Encoder.h>
 #include "src/telemetry.h"
 #include "src/configuration.h"
 #include "src/drive.h"
@@ -20,6 +22,8 @@
 #define MIN_MOTOR_VOLTS 3  // Tune per your DC motor.
 #define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
 #define ANGLE_FALLEN 40
+#define WHEEL_DISTANCE_M 0.208916  // 66.5mm diameter.
+#define ENC_PULSES_PER_ROTATION 543.0  // 48:1 gearbox and ?!?! 11.3125 divisor. Odd.
 
 // Arduino wiring configuration.
 #define ENABLE_GPIO 13
@@ -27,6 +31,11 @@
 // Both motors bound together for now.
 #define MOTOR_FORWARD_GPIO 14
 #define MOTOR_REVERSE_GPIO 27
+
+#define ENC_LEFT_A_GPIO 39
+#define ENC_LEFT_B_GPIO 38
+#define ENC_RIGHT_A_GPIO 36
+#define ENC_RIGHT_B_GPIO 37
 
 // PWM
 #define PWM_FREQUENCY 5000
@@ -49,10 +58,16 @@ double pitchPidInput;
 double pitchPidOutput;
 PID pitchPid(&pitchPidInput, &pitchPidOutput, &pitchPidSetpoint, P, I, D, DIRECT);
 
+// Encoder trackers.
+ESP32Encoder encoderLeft;
+ESP32Encoder encoderRight;
+double distanceLeftM = 0;
+double distanceRightM = 0;
+
 // Statistics/telemetry
 int watchdog = 0;
 int rate = 0;
-const int statsUpdateMillis = 1000;
+const int statsUpdateMillis = 250;
 unsigned long lastStatsUpdateMillis = 0;
 int rateLoops = 0;
 
@@ -65,7 +80,9 @@ TelemetryData_t telemetryData = {
     &rate,
     &pitchCorrection,
     &pitchPidInput,
-    &pitchPidOutput
+    &pitchPidOutput,
+    &distanceLeftM,
+    &distanceRightM
 };
 
 Configuration_t configuration = {
@@ -147,6 +164,9 @@ void setupPins() {
 
     ledcWrite(PWM_MOTOR_FORWARD_CHANNEL, 0);
     ledcWrite(PWM_MOTOR_REVERSE_CHANNEL, 0);
+
+    encoderLeft.attachFullQuad(ENC_LEFT_A_GPIO, ENC_LEFT_B_GPIO);
+    encoderRight.attachFullQuad(ENC_RIGHT_A_GPIO, ENC_RIGHT_B_GPIO);
 }
 
 void setupF3() {
@@ -160,11 +180,14 @@ void updateStats() {
     unsigned long nowMillis = millis();
     unsigned long elapsedMillis = nowMillis - lastStatsUpdateMillis;
     if (elapsedMillis > statsUpdateMillis) {
-          watchdog++;
-          rate = rateLoops / (elapsedMillis / 1000.0);
+        watchdog++;
+        rate = rateLoops / (elapsedMillis / 1000.0);
+
+        distanceLeftM = (((int32_t)encoderLeft.getCount()) / ENC_PULSES_PER_ROTATION) * WHEEL_DISTANCE_M;
+        distanceRightM = (((int32_t)encoderRight.getCount()) / ENC_PULSES_PER_ROTATION) * WHEEL_DISTANCE_M;
           
-          rateLoops = 0;
-          lastStatsUpdateMillis = nowMillis;
+        rateLoops = 0;
+        lastStatsUpdateMillis = nowMillis;
     }
 
     rateLoops++;

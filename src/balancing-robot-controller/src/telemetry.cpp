@@ -43,7 +43,9 @@ void _telemetry(void *parameters) {
             *telemetryData.rate,
             *telemetryData.pitchCorrection,
             *telemetryData.pitch,
-            *telemetryData.pitchPidOutput
+            *telemetryData.pitchPidOutput,
+            *telemetryData.distanceLeftM,
+            *telemetryData.distanceRightM
         );
 
         udp.beginPacket(target_ip, target_port);
