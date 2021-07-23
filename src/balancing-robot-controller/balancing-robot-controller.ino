@@ -185,7 +185,10 @@ void updateStats() {
 
         distanceLeftM = (((int32_t)encoderLeft.getCount()) / ENC_PULSES_PER_ROTATION) * WHEEL_DISTANCE_M;
         distanceRightM = (((int32_t)encoderRight.getCount()) / ENC_PULSES_PER_ROTATION) * WHEEL_DISTANCE_M;
-          
+
+        // Station keeping.
+        pitchPidSetpoint = -distanceLeftM * 2;
+
         rateLoops = 0;
         lastStatsUpdateMillis = nowMillis;
     }
