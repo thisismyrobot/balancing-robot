@@ -22,3 +22,20 @@ py tester.py
 
 ## DG01D-E
 
+py tester.py
+
+    Mass of weight in kilograms (0.05):
+    Wheel diameter in metres (0.0665):
+    Wheel rotations (2): 1
+    Duration of lift in seconds: 0.9666666666666667
+    Battery voltage (5):
+    0.10Nm (1.04kgf.cm) & 0.11W @ 5.0V & 62.07RPM
+
+py tester.py
+
+    Mass of weight in kilograms (0.05):
+    Wheel diameter in metres (0.0665):
+    Wheel rotations (2):
+    Duration of lift in seconds: 1.966666666666667
+    Battery voltage (5):
+    0.10Nm (1.04kgf.cm) & 0.10W @ 5.0V & 61.02RPM
