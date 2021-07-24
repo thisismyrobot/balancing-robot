@@ -48,10 +48,10 @@ def calculate(mass_kg, diameter_m, rotations_r, time_s, voltage_v):
 
 
 if __name__ == '__main__':
-    mass_kg = question('Mass of weight in kilograms', 0.1)
+    mass_kg = question('Mass of weight in kilograms', 0.05)
     diameter_m = question('Wheel diameter in metres', 0.0665)
-    rotations_r = question('Wheel rotations', 1)
+    rotations_r = question('Wheel rotations', 2)
     time_s = question('Duration of lift in seconds')
-    voltage_v = question('Battery voltage')
+    voltage_v = question('Battery voltage', 5)
 
     calculate(mass_kg, diameter_m, rotations_r, time_s, voltage_v)
