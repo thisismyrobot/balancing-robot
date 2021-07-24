@@ -12,25 +12,28 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <PID_v1.h>
-#include <ESP32Encoder.h>
 #include "src/telemetry.h"
 #include "src/configuration.h"
 #include "src/drive.h"
 
 // Robot configuration and characteristics.
-#define BATTERY_VOLTAGE 12.0  // TODO: Read live.
-#define MIN_MOTOR_VOLTS 3  // Tune per your DC motor.
 #define ANGLE_DEADZONE 0.1 // +/- this pitch value is considered zero.
 #define ANGLE_FALLEN 40
+
+// Closed loop motor control.
 #define WHEEL_DISTANCE_M 0.208916  // 66.5mm diameter.
 #define ENC_PULSES_PER_ROTATION 543.0  // 48:1 gearbox and ?!?! 11.3125 divisor. Odd.
+#define MOTOR_CONTROL_P 50
+#define MOTOR_CONTROL_I 500
+#define MOTOR_CONTROL_D 0
 
 // Arduino wiring configuration.
 #define ENABLE_GPIO 13
 #define LED_GPIO 25
+
 // Both motors bound together for now.
-#define MOTOR_FORWARD_GPIO 14
-#define MOTOR_REVERSE_GPIO 27
+#define MOTOR_FORWARD_GPIO 27
+#define MOTOR_REVERSE_GPIO 14
 
 #define ENC_LEFT_A_GPIO 39
 #define ENC_LEFT_B_GPIO 38
@@ -58,9 +61,9 @@ double pitchPidInput;
 double pitchPidOutput;
 PID pitchPid(&pitchPidInput, &pitchPidOutput, &pitchPidSetpoint, P, I, D, DIRECT);
 
-// Encoder trackers.
-ESP32Encoder encoderLeft;
-ESP32Encoder encoderRight;
+// Motor commands and tracking
+double leftSpeedCommand = 0;
+double rightSpeedCommand = 0;
 double distanceLeftM = 0;
 double distanceRightM = 0;
 
@@ -89,12 +92,29 @@ Configuration_t configuration = {
     &pitchCorrection
 };
 
+DriveCommands_t driveCommands = {
+    &leftSpeedCommand,
+    &rightSpeedCommand,
+    &distanceLeftM,
+    &distanceRightM
+};
 
 HardwareSerial F3Serial(1);
 
 void setup() {
     setupPins();
-    setDriveParams(PWM_MOTOR_FORWARD_CHANNEL, PWM_MOTOR_REVERSE_CHANNEL, MIN_MOTOR);
+    setDriveParams(
+        PWM_MOTOR_FORWARD_CHANNEL,
+        PWM_MOTOR_REVERSE_CHANNEL,
+        ENC_LEFT_A_GPIO,
+        ENC_LEFT_B_GPIO,
+        ENC_RIGHT_A_GPIO,
+        ENC_RIGHT_B_GPIO,
+        WHEEL_DISTANCE_M,
+        ENC_PULSES_PER_ROTATION,
+        MOTOR_CONTROL_P,
+        MOTOR_CONTROL_I,
+        MOTOR_CONTROL_D);
 
     pitchPid.SetOutputLimits(-255, 255);
     pitchPid.SetMode(AUTOMATIC);
@@ -112,6 +132,7 @@ void setup() {
 
     startConfigurationTask((Configuration_t *)&configuration);
     startTelemetryTask((TelemetryData_t *)&telemetryData);
+    startDriveTask((DriveCommands_t *)&driveCommands);
 }
 
 double getAveragePitch(int loops)
@@ -142,7 +163,10 @@ void loop() {
     pitchPidInput = pitch;
 
     pitchPid.Compute();
-    setSpeed(pitchPidOutput);
+
+    // Until steering implemented.
+    leftSpeedCommand = pitchPidOutput;
+    rightSpeedCommand = pitchPidOutput;
 
     updateStats();
 
@@ -164,9 +188,6 @@ void setupPins() {
 
     ledcWrite(PWM_MOTOR_FORWARD_CHANNEL, 0);
     ledcWrite(PWM_MOTOR_REVERSE_CHANNEL, 0);
-
-    encoderLeft.attachFullQuad(ENC_LEFT_A_GPIO, ENC_LEFT_B_GPIO);
-    encoderRight.attachFullQuad(ENC_RIGHT_A_GPIO, ENC_RIGHT_B_GPIO);
 }
 
 void setupF3() {
@@ -182,13 +203,6 @@ void updateStats() {
     if (elapsedMillis > statsUpdateMillis) {
         watchdog++;
         rate = rateLoops / (elapsedMillis / 1000.0);
-
-        distanceLeftM = (((int32_t)encoderLeft.getCount()) / ENC_PULSES_PER_ROTATION) * WHEEL_DISTANCE_M;
-        distanceRightM = (((int32_t)encoderRight.getCount()) / ENC_PULSES_PER_ROTATION) * WHEEL_DISTANCE_M;
-
-        // Station keeping.
-        pitchPidSetpoint = -distanceLeftM * 2;
-
         rateLoops = 0;
         lastStatsUpdateMillis = nowMillis;
     }
