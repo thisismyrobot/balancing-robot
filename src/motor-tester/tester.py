@@ -25,9 +25,9 @@ def question(text, default=None):
     return float(answer)
 
 
-def calculate(mass_kg, diameter_m, rotations_r, time_s):
+def calculate(mass_kg, diameter_m, rotations_r, time_s, voltage_v):
     # c = 2πr
-    height_m = math.pi * diameter_m
+    height_m = math.pi * diameter_m * rotations_r
 
     # W = mgh
     work_J = mass_kg * GRAVITY * height_m
@@ -35,27 +35,23 @@ def calculate(mass_kg, diameter_m, rotations_r, time_s):
     # P = W/t
     power_W = work_J / time_s
 
-    print(f'{power_W} Watts of power')
-
     # v = d / t
     angular_velocity_rs = rotations_r / time_s
 
     # τ = P / ω
     torque_Nm = power_W / angular_velocity_rs
 
-    print(f'{torque_Nm} Nm of torque')
-
     torque_kgcm = torque_Nm * (100 / GRAVITY);
+    angular_velocity_rpm = angular_velocity_rs * 60
 
-    print(f'{torque_kgcm} kg-cm of torque')
-
+    print(f'{torque_Nm:.2f}Nm ({torque_kgcm:.2f}kgf.cm) & {power_W:.2f}W @ {voltage_v}V & {angular_velocity_rpm:.2f}RPM')
 
 
 if __name__ == '__main__':
     mass_kg = question('Mass of weight in kilograms', 0.1)
     diameter_m = question('Wheel diameter in metres', 0.0665)
     rotations_r = question('Wheel rotations', 1)
-    ratio = question('Gearbox ratio (?:1)', 48)
     time_s = question('Duration of lift in seconds')
+    voltage_v = question('Battery voltage')
 
-    calculate(mass_kg, diameter_m, rotations_r, time_s)
+    calculate(mass_kg, diameter_m, rotations_r, time_s, voltage_v)
