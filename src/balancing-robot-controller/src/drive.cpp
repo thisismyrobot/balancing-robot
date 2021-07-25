@@ -91,6 +91,16 @@ void _drive(void *parameters) {
         leftPid.Compute();
         rightPid.Compute();
 
+        if (*drive.leftSpeed == 0) {
+            leftPwmOutput = 0;
+        }
+        else if (*drive.leftSpeed > 0) {
+            leftPwmOutput = max((double)0.0, leftPwmOutput);
+        }
+        else if (*drive.leftSpeed < 0) {
+            leftPwmOutput = min((double)0.0, leftPwmOutput);
+        }
+
         _setPwm(leftPwmOutput, rightPwmOutput);
 
         *drive.distanceLeftM = _toDistanceMetres(leftCount);
@@ -100,7 +110,7 @@ void _drive(void *parameters) {
         lastLeftCount = leftCount;
         lastRightCount = rightCount;
 
-        delay(100);
+        delay(5);
     }
 }
 
