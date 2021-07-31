@@ -55,6 +55,6 @@ void _telemetry(void *parameters) {
         udp.endPacket();
 
         // At least 1, otherwise the watchdog kills the task.
-        delay(50);
+        delay(20); // 50 Hz
     }
 }

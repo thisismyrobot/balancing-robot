@@ -30,17 +30,17 @@ def listen():
         ) = message
         packets += 1
 
-        output = ','.join(
+        output = ','.join((
             f'IP: {ip}',
             f'Packet: {packets}',
             f'Count: {count}',
             f'Rate (Hz): {rate}',
-            f'Pitch Correct (°): {pitch_correction:.1f}',
-            f'Pitch (°): {pitch:.1f}',
-            f'PID output (m/s): {pid_pitch_output:.2f}',
-            f'Left (m/s): {left_cmd:.2f}, {left_actual:.2f}',
-            f'Right (m/s): {right_cmd:.2f}, {right_actual:.2f}',
-        )
+            f'Pitch Correct (°): {pitch_correction:.2f}',
+            f'Pitch (°): {pitch:.2f}',
+            f'PID output (m/s): {pid_pitch_output:.3f}',
+            f'Left (m/s): {left_cmd:.3f}, {left_actual:.3f}',
+            f'Right (m/s): {right_cmd:.3f}, {right_actual:.3f}',
+        ))
         print(output)
 
 
