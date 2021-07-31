@@ -44,8 +44,10 @@ void _telemetry(void *parameters) {
             *telemetryData.pitchCorrection,
             *telemetryData.pitch,
             *telemetryData.pitchPidOutput,
-            *telemetryData.distanceLeftM,
-            *telemetryData.distanceRightM
+            *telemetryData.leftSpeedCommand,
+            *telemetryData.rightSpeedCommand,
+            *telemetryData.leftSpeedActual,
+            *telemetryData.rightSpeedActual
         );
 
         udp.beginPacket(target_ip, target_port);
@@ -53,6 +55,6 @@ void _telemetry(void *parameters) {
         udp.endPacket();
 
         // At least 1, otherwise the watchdog kills the task.
-        delay(100);
+        delay(50);
     }
 }

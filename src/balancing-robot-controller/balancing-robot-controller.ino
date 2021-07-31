@@ -64,8 +64,8 @@ PID pitchPid(&pitchPidInput, &pitchPidOutput, &pitchPidSetpoint, P, I, D, DIRECT
 // Motor commands and tracking
 double leftSpeedCommand = 0;
 double rightSpeedCommand = 0;
-double distanceLeftM = 0;
-double distanceRightM = 0;
+double leftSpeedActual = 0;
+double rightSpeedActual = 0;
 
 // Statistics/telemetry
 int watchdog = 0;
@@ -84,8 +84,10 @@ TelemetryData_t telemetryData = {
     &pitchCorrection,
     &pitchPidInput,
     &pitchPidOutput,
-    &distanceLeftM,
-    &distanceRightM
+    &leftSpeedCommand,
+    &rightSpeedCommand,
+    &leftSpeedActual,
+    &rightSpeedActual    
 };
 
 Configuration_t configuration = {
@@ -95,8 +97,8 @@ Configuration_t configuration = {
 DriveCommands_t driveCommands = {
     &leftSpeedCommand,
     &rightSpeedCommand,
-    &distanceLeftM,
-    &distanceRightM
+    &leftSpeedActual,
+    &rightSpeedActual
 };
 
 HardwareSerial F3Serial(1);
@@ -116,6 +118,8 @@ void setup() {
         MOTOR_CONTROL_I,
         MOTOR_CONTROL_D);
 
+/*
+
     pitchPid.SetOutputLimits(-255, 255);
     pitchPid.SetMode(AUTOMATIC);
 
@@ -131,8 +135,10 @@ void setup() {
     pitchCorrection = getAveragePitch(10);
 
     startConfigurationTask((Configuration_t *)&configuration);
-    startTelemetryTask((TelemetryData_t *)&telemetryData);
+
+*/
     startDriveTask((DriveCommands_t *)&driveCommands);
+    startTelemetryTask((TelemetryData_t *)&telemetryData);
 }
 
 double getAveragePitch(int loops)
@@ -150,6 +156,32 @@ double getAveragePitch(int loops)
 }
 
 void loop() {
+
+    leftSpeedCommand = 0.1;
+
+    delay(5000);
+
+    leftSpeedCommand = 0;
+
+    delay(2000);
+
+    leftSpeedCommand = -0.2;
+
+    delay(2500);
+
+    leftSpeedCommand = 0;
+
+    delay(2000);
+
+    leftSpeedCommand = 0.5;
+
+    delay(1000);
+
+    leftSpeedCommand = -0.2;
+
+    delay(2500);
+
+    /*
     double pitch = readPitch();
 
     if (pitch > ANGLE_FALLEN || pitch < -ANGLE_FALLEN) {
@@ -169,7 +201,7 @@ void loop() {
     rightSpeedCommand = pitchPidOutput;
 
     updateStats();
-
+*/
     if(!enabled()) {
         reset();
     }

@@ -8,8 +8,10 @@ typedef struct Data_t
     double *pitchCorrection;
     double *pitch;
     double *pitchPidOutput;
-    double *distanceLeftM;
-    double *distanceRightM;
+    double *leftSpeedCommand;
+    double *rightSpeedCommand;
+    double *leftSpeedActual;
+    double *rightSpeedActual;
 } TelemetryData_t;
 
 void startTelemetryTask(TelemetryData_t *telemetryData);

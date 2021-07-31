@@ -60,13 +60,11 @@ void _drive(void *parameters) {
 
     DriveCommands_t drive = *((DriveCommands_t*)parameters);
 
-    double leftSpeedActual = 0;
-    double rightSpeedActual = 0;
     double leftPwmOutput = 0;
     double rightPwmOutput = 0;
 
-    PID leftPid(&leftSpeedActual, &leftPwmOutput, drive.leftSpeed, _driveP, _driveI, _driveD, DIRECT);
-    PID rightPid(&rightSpeedActual, &rightPwmOutput, drive.rightSpeed, _driveP, _driveI, _driveD, DIRECT);
+    PID leftPid(drive.leftSpeedActual, &leftPwmOutput, drive.leftSpeedCommand, _driveP, _driveI, _driveD, DIRECT);
+    PID rightPid(drive.rightSpeedActual, &rightPwmOutput, drive.rightSpeedCommand, _driveP, _driveI, _driveD, DIRECT);
 
     leftPid.SetOutputLimits(-255, 255);
     rightPid.SetOutputLimits(-255, 255);
@@ -85,26 +83,33 @@ void _drive(void *parameters) {
         int leftCount = (int32_t)_encoderLeft.getCount();
         int rightCount = (int32_t)_encoderRight.getCount();
 
-        leftSpeedActual = _toDistanceMetres(leftCount - lastLeftCount) / elapsedSeconds;
-        rightSpeedActual = _toDistanceMetres(rightCount - lastRightCount) / elapsedSeconds;
+        *drive.leftSpeedActual = _toDistanceMetres(leftCount - lastLeftCount) / elapsedSeconds;
+        *drive.rightSpeedActual = _toDistanceMetres(rightCount - lastRightCount) / elapsedSeconds;
 
         leftPid.Compute();
         rightPid.Compute();
 
-        if (*drive.leftSpeed == 0) {
+        if (*drive.leftSpeedCommand == 0) {
             leftPwmOutput = 0;
         }
-        else if (*drive.leftSpeed > 0) {
+        else if (*drive.leftSpeedCommand > 0) {
             leftPwmOutput = max((double)0.0, leftPwmOutput);
         }
-        else if (*drive.leftSpeed < 0) {
+        else if (*drive.leftSpeedCommand < 0) {
             leftPwmOutput = min((double)0.0, leftPwmOutput);
         }
 
-        _setPwm(leftPwmOutput, rightPwmOutput);
+        if (*drive.rightSpeedCommand == 0) {
+            rightPwmOutput = 0;
+        }
+        else if (*drive.rightSpeedCommand > 0) {
+            rightPwmOutput = max((double)0.0, leftPwmOutput);
+        }
+        else if (*drive.rightSpeedCommand < 0) {
+            rightPwmOutput = min((double)0.0, leftPwmOutput);
+        }
 
-        *drive.distanceLeftM = _toDistanceMetres(leftCount);
-        *drive.distanceRightM = _toDistanceMetres(rightCount);
+        _setPwm(leftPwmOutput, rightPwmOutput);
 
         lastPidUpdateMillis = nowMillis;
         lastLeftCount = leftCount;

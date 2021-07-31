@@ -8,9 +8,12 @@ End goal is the Wheelie Boy from The Peripheral.
 This is an educational (for myself) project but I want to share my steps
 towards achieving (or not) this goal.
 
+If you want to try out some of the code, use the tags below, anything else is
+probably WIP and may not do anything useful :)
+
 ## Version 3
 
-Currently being designed.
+Currently being developed.
 
 ### Thoughts
 
@@ -18,7 +21,7 @@ Currently being designed.
  * Most likely will use ESP32 to handle extra interrupts etc. Alternatively an
    M5Stack-C that I have with built-in IMU.
  * Should be able to read from F3 board - if using that - at a higher baud
-   with ESP32.
+   with ESP32. Backup is MPU6050.
  * Stream UDP telemetry and maybe even take commands - using second ESP32
    core? UDP for reduced cycle time.
  * I'll need to build a PID loop for the motor control too, something new and

@@ -4,12 +4,10 @@
 typedef struct Drive_t
 {
     // Metres/second.
-    double *leftSpeed;
-    double *rightSpeed;
-
-    // Metres.
-    double *distanceLeftM;
-    double *distanceRightM;
+    double *leftSpeedCommand;
+    double *rightSpeedCommand;
+    double *leftSpeedActual;
+    double *rightSpeedActual;
 } DriveCommands_t;
 
 void setDriveParams(
