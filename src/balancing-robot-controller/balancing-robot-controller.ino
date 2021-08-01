@@ -23,7 +23,7 @@
 // Closed loop motor control.
 #define WHEEL_DISTANCE_M 0.208916  // 66.5mm diameter.
 #define ENC_PULSES_PER_ROTATION 543.0  // 48:1 gearbox and ?!?! 11.3125 divisor. Odd.
-#define MOTOR_CONTROL_P 500  // 0.5m/s is approx max power
+#define MOTOR_CONTROL_P 500  // 0.5m/s is approx max speed, which is 255 PWM.
 #define MOTOR_CONTROL_I 500
 #define MOTOR_CONTROL_D 0
 
@@ -50,9 +50,9 @@
 #define MSP_ATTITUDE 108
 
 // PID configuration.
-#define P 30.0
-#define I 100.0
-#define D 1.0
+#define P 0.05
+#define I 0.3
+#define D 0.001
 #define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
 
 // PID instances.
@@ -118,9 +118,7 @@ void setup() {
         MOTOR_CONTROL_I,
         MOTOR_CONTROL_D);
 
-/*
-
-    pitchPid.SetOutputLimits(-255, 255);
+    pitchPid.SetOutputLimits(-1.0, 1.0);
     pitchPid.SetMode(AUTOMATIC);
 
     while(!enabled()) {
@@ -131,60 +129,29 @@ void setup() {
     }
 
     setupF3();
-
-    pitchCorrection = getAveragePitch(10);
+    pitchCorrection = getAveragePitch(20, 200);
 
     startConfigurationTask((Configuration_t *)&configuration);
-
-*/
     startTelemetryTask((TelemetryData_t *)&telemetryData);
-
-    delay(5000);
-
     startDriveTask((DriveCommands_t *)&driveCommands);
 }
 
-double getAveragePitch(int loops)
+double getAveragePitch(int loops, int delayMs)
 {
     double average = 0;
     for(int i = 0; i < loops; i++)
     {
         average += readPitch();
         digitalWrite(LED_GPIO, LOW);
-        delay(150);
+        delay(delayMs / 2);
         digitalWrite(LED_GPIO, HIGH);
-        delay(150);
+        delay(delayMs / 2);
     }
     return average / loops;
 }
 
 void loop() {
 
-    leftSpeedCommand = 0.1;
-
-    delay(5000);
-
-    leftSpeedCommand = 0;
-
-    delay(2000);
-
-    leftSpeedCommand = -0.2;
-
-    delay(2500);
-
-    leftSpeedCommand = 0;
-
-    delay(2000);
-
-    leftSpeedCommand = 0.5;
-
-    delay(1000);
-
-    leftSpeedCommand = -0.2;
-
-    delay(2500);
-
-    /*
     double pitch = readPitch();
 
     if (pitch > ANGLE_FALLEN || pitch < -ANGLE_FALLEN) {
@@ -195,7 +162,7 @@ void loop() {
         pitch = 0;
     }
 
-    pitchPidInput = pitch;
+    pitchPidInput = -pitch;
 
     pitchPid.Compute();
 
@@ -204,7 +171,7 @@ void loop() {
     rightSpeedCommand = pitchPidOutput;
 
     updateStats();
-*/
+
     if(!enabled()) {
         reset();
     }

@@ -1,5 +1,7 @@
 # Measurements
 
+![](DG01D-E.gif)
+
 ## DG01D-A130GEARMOTOR
 
 py tester.py
