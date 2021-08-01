@@ -2,82 +2,56 @@ use <Toysans-Xe5d.ttf>
 
 print = false;
 
-$fn = print ? 200 : 50;
+$fn = print ? 200 : 20;
 
 hub_width = 26;
 hub_diam = 51.6;
 
-tire_diam = 110;
-tire_width = 40;
-tire_soften = 4;
+hubcap_thickness = 1;
 
+spoke_width = 0.5; // Tune to single pass of nozzle.
+
+rim_width = 2;
+tire_diam = 110;
+tire_width = 30;
+    
 
 module hub()
 {
     cylinder(r=hub_diam / 2, h=hub_width);
 }
 
-module letter(rotation, letter)
+module hubCap()
 {
-    font_size = (tire_diam - hub_diam) / 4;
-    tire_centre = (hub_diam / 2) + ((tire_diam - hub_diam) / 4);
-    rotate([0, 0, -rotation]) translate([0, tire_centre - (font_size / 2), -1]) linear_extrude(2) text(letter, font_size, "ToySans", halign="center");
-}
-
-module model()
-{   
-    letter(0, "W");
-    letter(25, "h");
-    letter(45, "e");
-    letter(64, "e");
-    letter(81, "l");
-    letter(94, "i");
-    letter(110, "e");
-    letter(150, "B");
-    letter(172, "o");
-    letter(193, "y");
-}
-
-module rubber()
-{
-    minkowski()
-    {
-        cylinder(r=(tire_diam / 2) - tire_soften, h=tire_width - (tire_soften * 2));
-        sphere(r=tire_soften);
-    }
-}
-
-module tread()
-{
-    depth = 4;
-    solid_centre = 5;
-    width = 10;
-    cuts = 18;
-    angle = 360 / cuts;
-    for (i = [0:cuts])
-    {
-        rotate([0, 0, i * angle]) translate([-width/2, (tire_diam / 2) - depth, -tire_soften-1]) cube([5, depth * 2, (tire_width / 2) + 1 - (solid_centre/2)]);
-    }
+    color([0.5, 0.5, 0.5]) cylinder(r=hub_diam / 2, h=hubcap_thickness);
     
-    for (i = [0:cuts])
-    {
-        rotate([0, 0, (i * angle) + (angle / 2)]) translate([-width/2, (tire_diam / 2) - depth, (tire_width / 2) + (solid_centre/2) - tire_soften]) cube([5, depth * 2, tire_width / 2]);
-    }
+    font_size = hub_diam / 6;
+    translate([0, 0, hubcap_thickness]) linear_extrude(hubcap_thickness) text("Wheelie", font_size, "ToySans", halign="center", spacing=1.1);    
+    translate([0, -hub_diam / 4.5, hubcap_thickness]) linear_extrude(hubcap_thickness) text("Boy", font_size, "ToySans", halign="center", spacing = 1.1);    
 }
 
 module tire()
 {
-    color([0.5, 0.5, 0.5]) difference() {
-        union() {
-            translate([0, 0, tire_soften]) difference() {
-                rubber();
-                tread();
-            }
-            translate([0, 0, tire_width]) model();
-        }
-        
-        // Hub hole.
+    // Inner rim.
+    difference() {
+        cylinder(r=(hub_diam / 2) + rim_width, h=tire_width);
         translate([0, 0, -10]) cylinder(r=hub_diam / 2, h=tire_width + 20);
+    }
+
+    // Inner rim.
+    difference() {
+        cylinder(r=(tire_diam / 2), h=tire_width);
+        translate([0, 0, -10]) cylinder(r=(tire_diam / 2) - rim_width, h=tire_width + 20);
+    }
+   
+    // Airless-ness (think Michelin "Uptis")
+    length = ((tire_diam - hub_diam) / 2) - (rim_width * 1.5);
+    spokes = 30;
+    for ( i = [0 : spokes] )
+    {
+        rotate([0, 0, (360 / spokes) * i]) translate([(hub_diam / 2) + rim_width, 0, 0]) linear_extrude(tire_width) {
+            polygon(points=[[-rim_width/2,-spoke_width/2],[length,-spoke_width/2],[length,spoke_width/2],[-rim_width/2,spoke_width/2]]);
+        }
     }
 }
 
@@ -86,4 +60,11 @@ if (!print)
     hub();
 }    
 
-tire();
+color([0.5, 0.5, 0.5]) tire();
+
+if (!print) {
+    translate([0, 0, hub_width]) hubCap();
+}
+else {
+    translate([0, tire_diam + hub_diam, 0]) hubCap();
+}
