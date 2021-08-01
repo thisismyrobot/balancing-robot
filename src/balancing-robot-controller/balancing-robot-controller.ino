@@ -23,8 +23,8 @@
 // Closed loop motor control.
 #define WHEEL_DISTANCE_M 0.208916  // 66.5mm diameter.
 #define ENC_PULSES_PER_ROTATION 543.0  // 48:1 gearbox and ?!?! 11.3125 divisor. Odd.
-#define MOTOR_CONTROL_P 50
-#define MOTOR_CONTROL_I 1000
+#define MOTOR_CONTROL_P 500  // 0.5m/s is approx max power
+#define MOTOR_CONTROL_I 500
 #define MOTOR_CONTROL_D 0
 
 // Arduino wiring configuration.
