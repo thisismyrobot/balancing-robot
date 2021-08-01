@@ -137,8 +137,11 @@ void setup() {
     startConfigurationTask((Configuration_t *)&configuration);
 
 */
-    startDriveTask((DriveCommands_t *)&driveCommands);
     startTelemetryTask((TelemetryData_t *)&telemetryData);
+
+    delay(5000);
+
+    startDriveTask((DriveCommands_t *)&driveCommands);
 }
 
 double getAveragePitch(int loops)
