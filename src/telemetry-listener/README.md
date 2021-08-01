@@ -6,7 +6,8 @@ Prints out telemetry from the robot, received over UDP.
 
 ## PID tuning
 
-An example application is the closed-loop motor control tuning I did:
+An example application is the closed-loop motor control tuning I did using
+data from the listener:
 
 ![](motor_control_pid_loop_performance_1.PNG)
 
