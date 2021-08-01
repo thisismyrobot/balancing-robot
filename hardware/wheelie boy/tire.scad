@@ -9,7 +9,7 @@ hub_diam = 51.6;
 
 hubcap_thickness = 1;
 
-spoke_width = 0.5; // Tune to single pass of nozzle.
+spoke_width = 0.75; // Tune to single pass of nozzle.
 
 rim_width = 2;
 tire_diam = 110;
@@ -55,16 +55,12 @@ module tire()
     }
 }
 
-if (!print)
-{
-    hub();
-}    
-
-color([0.5, 0.5, 0.5]) tire();
-
 if (!print) {
+    hub();
     translate([0, 0, hub_width]) hubCap();
 }
 else {
-    translate([0, tire_diam + hub_diam, 0]) hubCap();
+    translate([0, ((tire_diam + hub_diam) / 2) + 10, 0]) hubCap();
 }
+
+color([0.5, 0.5, 0.5]) tire();
