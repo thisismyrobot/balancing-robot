@@ -5,6 +5,10 @@
 WIP, but the idea is to ramp voltage until a weight moves, then back-calculate
 the stall-torque per volt so it's comparable to values on other spec sheets.
 
+After testing I think the better approach would be lowering voltage until the
+motor stops. There seems to be a high "get-moving" friction at play which
+makes sense. Better to be moving then slow until stopped.
+
 ## tester.py - measuring motor power
 
 ![](DG01D-E.gif)

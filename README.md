@@ -13,7 +13,9 @@ probably WIP and may not do anything useful :)
 
 ## Version 3
 
-Currently being developed.
+Currently WIP.
+
+![](doc/build%203.gif) ![](doc/build%203.jpg)
 
 ### Thoughts
 
