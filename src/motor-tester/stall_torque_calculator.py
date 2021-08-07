@@ -56,7 +56,7 @@ def manual_entry():
     calculate(mass_kg, diameter_m, voltage_v)
 
 
-def measure_motor(port='COM8', samples=2, fallback=1.0):
+def measure_motor(port='COM8', samples=2, slow_ratio=0.75):
     """Assumes Pololu qik 2s9v1 attached to COM1 and the motor to M0."""
     mass_kg = question('Mass of weight in kilograms', 0.05)
     diameter_m = question('Wheel diameter in metres', 0.0479)
@@ -75,6 +75,7 @@ def measure_motor(port='COM8', samples=2, fallback=1.0):
             time.sleep(0.01)
     threading.Thread(target=space_listener_thread).start()
 
+    up = True
     move_points_v = []
     motor_voltage_v = 0
     with serial.Serial(port, 38400, timeout=1) as conn:
@@ -90,7 +91,8 @@ def measure_motor(port='COM8', samples=2, fallback=1.0):
                 print(f'{motor_voltage_v:.2f}V ({duty}/255)')
 
                 move_points_v.append(motor_voltage_v)
-                motor_voltage_v = max(0, motor_voltage_v - fallback)
+                up = not up
+                motor_voltage_v = motor_voltage_v * slow_ratio
 
             duty = int((motor_voltage_v / supply_voltage_v) * 255.0)
             duty = max(0, min(duty, 255))
@@ -100,8 +102,10 @@ def measure_motor(port='COM8', samples=2, fallback=1.0):
             else:
                 conn.write(bytearray([0x89, duty - 128]))
 
-            if motor_voltage_v < supply_voltage_v:
-                motor_voltage_v += 0.01
+            if up and motor_voltage_v < supply_voltage_v:
+                motor_voltage_v += 0.02
+            elif not up and motor_voltage_v > 0:
+                motor_voltage_v -= 0.02
 
             time.sleep(0.1)
 
