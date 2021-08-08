@@ -60,6 +60,44 @@ I think there is potential in this technique of estimating comparable stall
 torque between different tested motors and spec sheets, as long as the stall
 voltages are reasonable close.
 
+### DG01D-E
+
+pipenv run python stall_torque_calculator.py --qik
+
+    Mass of weight in kilograms (0.052):
+    Wheel diameter in metres (0.0479):
+    Supply voltage (5): 5.1
+    Press [Enter] to begin...
+    Press [Enter] when the motor starts!
+    Press [Enter] when the motor stops!
+    0.01Nm (0.12kgf.cm) @ 1.88V => 0.00650Nm/V (0.0662kgf.cm/V)
+
+pipenv run python stall_torque_calculator.py --qik
+
+    Mass of weight in kilograms (0.052): 0.09
+    Wheel diameter in metres (0.0479):
+    Supply voltage (5): 5.1
+    Press [Enter] to begin...
+    Press [Enter] when the motor starts!
+    Press [Enter] when the motor stops!
+    0.02Nm (0.22kgf.cm) @ 2.68V => 0.00789Nm/V (0.0804kgf.cm/V)
+
+pipenv run python stall_torque_calculator.py --qik
+
+    Mass of weight in kilograms (0.052): 0.162
+    Wheel diameter in metres (0.0479):
+    Supply voltage (5): 5.1
+    Press [Enter] to begin...
+    Press [Enter] when the motor starts!
+    Press [Enter] when the motor stops!
+    0.04Nm (0.39kgf.cm) @ 4.18V => 0.00910Nm/V (0.0928kgf.cm/V)
+
+This backed up some of the results I had before, though the motor is soo weak
+I had to use lower weights. On pure comparison though, the DG01D-E is has a
+50% lower stall torque compared to the DG01D-A130GEARMOTOR. The below
+measurements show it as having 1/3 of the power. No wonder it's not working
+for V3 of this robot.
+
 ## tester.py - measuring motor power
 
 ![](DG01D-E.gif)
