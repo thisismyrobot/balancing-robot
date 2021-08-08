@@ -56,10 +56,11 @@ def manual_entry():
     calculate(mass_kg, diameter_m, voltage_v)
 
 
-def measure_motor(port='COM8', duty=50, slow_ratio=0.75, rate=1):
+def measure_motor(port='COM8', duty=50, rate=1):
     """Assumes Pololu qik 2s9v1 attached to COM8 and the motor to M0."""
-    mass_kg = question('Mass of weight in kilograms', 0.05)
+    mass_kg = question('Mass of weight in kilograms', 0.052)
     diameter_m = question('Wheel diameter in metres', 0.0479)
+    supply_voltage_v = question('Supply voltage', 5)
 
     input('Press [Enter] to begin...')
     print('Press [Enter] when the motor starts!', end='', flush=True)
@@ -74,6 +75,7 @@ def measure_motor(port='COM8', duty=50, slow_ratio=0.75, rate=1):
             enter_pressed = True
     threading.Thread(target=space_listener_thread, daemon=True).start()
 
+    stall_point_v = 0
     up = True
     with serial.Serial(port, 38400, timeout=1) as conn:
 
@@ -88,12 +90,13 @@ def measure_motor(port='COM8', duty=50, slow_ratio=0.75, rate=1):
                 if up:
                     print('Press [Enter] when the motor stops!', end='', flush=True)
                     up = False
-                    duty = duty * slow_ratio
                     track_enter = False
                 else:
+                    stall_point_v = (duty / 255.0) * supply_voltage_v
                     break
 
             # M0 speed
+            duty = max(0, min(duty, 255))
             if duty <= 127:
                 conn.write(bytearray([0x88, int(duty)]))
             else:
@@ -103,11 +106,8 @@ def measure_motor(port='COM8', duty=50, slow_ratio=0.75, rate=1):
                 duty += rate
             else:
                 duty -= rate
-            duty = max(0, min(duty, 255))
 
             time.sleep(0.1)
-
-        stall_point_v = question('Current motor voltage')
 
         # M0 Coast
         conn.write(bytearray([0x86]))
