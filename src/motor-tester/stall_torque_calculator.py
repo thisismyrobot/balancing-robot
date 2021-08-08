@@ -1,8 +1,10 @@
 """
 
 A calculator of motor stall torque per volt, using a weight on a string and a
-raising voltage. Just before the motor starts to move is the point you care
-about.
+raising voltage.
+
+Firstly the motor voltage is raised until the motor starts moving, then it is
+lowered until it stalls.
 
 https://courses.lumenlearning.com/physics/chapter/7-3-gravitational-potential-energy/
 https://www.ftexploring.com/energy/power_1.html
@@ -51,16 +53,19 @@ def calculate(mass_kg, diameter_m, voltage_v):
 def manual_entry():
     mass_kg = question('Mass of weight in kilograms', 0.05)
     diameter_m = question('Wheel diameter in metres', 0.0479)
-    voltage_v = question('Voltage when wheel moved')
+    voltage_v = question('Voltage when wheel stalled')
 
     calculate(mass_kg, diameter_m, voltage_v)
 
 
-def measure_motor(port='COM8', samples=2, slow_ratio=0.75):
-    """Assumes Pololu qik 2s9v1 attached to COM1 and the motor to M0."""
+def measure_motor(port='COM8', start=0.5, slow_ratio=0.75, rate=0.02):
+    """Assumes Pololu qik 2s9v1 attached to COM8 and the motor to M0."""
     mass_kg = question('Mass of weight in kilograms', 0.05)
     diameter_m = question('Wheel diameter in metres', 0.0479)
     supply_voltage_v = question('Supply voltage')
+
+    input('Press [Enter] to begin...')
+    print('Press [Space] when the motor starts!')
 
     global space_pressed
     space_pressed = False
@@ -76,47 +81,50 @@ def measure_motor(port='COM8', samples=2, slow_ratio=0.75):
     threading.Thread(target=space_listener_thread).start()
 
     up = True
-    move_points_v = []
-    motor_voltage_v = 0
+    stall_point_v = 0
+    motor_voltage_v = start
     with serial.Serial(port, 38400, timeout=1) as conn:
 
         # 8-bit PWM, 3.9 kHz.
         conn.write(bytearray([0x84, 0x01, 0x03, 0x55, 0x2A]))
 
-        # Increase until move.
         while True:
 
             if space_pressed:
                 space_pressed = False
-                print(f'{motor_voltage_v:.2f}V ({duty}/255)')
 
-                move_points_v.append(motor_voltage_v)
-                up = not up
-                motor_voltage_v = motor_voltage_v * slow_ratio
+                if up:
+                    print('Press [Space] when the motor stops!')
+                    up = False
+                    motor_voltage_v = motor_voltage_v * slow_ratio
+                else:
+                    print(f'{motor_voltage_v:.2f}V ({duty}/255)')
+                    stall_point_v = motor_voltage_v
+                    break
 
             duty = int((motor_voltage_v / supply_voltage_v) * 255.0)
             duty = max(0, min(duty, 255))
 
+            # M0 speed
             if duty <= 127:
                 conn.write(bytearray([0x88, duty]))
             else:
                 conn.write(bytearray([0x89, duty - 128]))
 
-            if up and motor_voltage_v < supply_voltage_v:
-                motor_voltage_v += 0.02
-            elif not up and motor_voltage_v > 0:
-                motor_voltage_v -= 0.02
+            if up:
+                motor_voltage_v += rate
+            else:
+                motor_voltage_v -= rate
 
             time.sleep(0.1)
 
-            if len(move_points_v) == samples:
-                conn.write(bytearray([0x86]))
-                break
+        calculate(mass_kg, diameter_m, stall_point_v)
 
-    average_move_v = statistics.mean(move_points_v)
-    points = ','.join([f'{p:.2f}' for p in move_points_v])
-    print(f'{average_move_v:.2f}V over {samples} samples: ({points})')
-    calculate(mass_kg, diameter_m, average_move_v)
+        input('Press [Enter] to halt motor...')
+
+        # M0 Coast
+        conn.write(bytearray([0x86]))
+
 
 
 if __name__ == '__main__':
