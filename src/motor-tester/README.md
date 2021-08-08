@@ -64,6 +64,10 @@ voltages are reasonable close.
 
 ![](DG01D-E.gif)
 
+This is a little simpler. By lifting a known weight a known distance over a
+known time, using a known voltage, you can calculate the power in Watts of a
+motor.
+
 ### DG01D-A130GEARMOTOR
 
 py tester.py
