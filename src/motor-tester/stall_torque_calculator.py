@@ -12,9 +12,7 @@ http://www.auburn.edu/academic/classes/scmh/1010/Energy%20and%20Work.php
 https://planetcalc.com/1908/
 
 """
-import math
 import msvcrt
-import statistics
 import sys
 import threading
 import time
@@ -58,31 +56,25 @@ def manual_entry():
     calculate(mass_kg, diameter_m, voltage_v)
 
 
-def measure_motor(port='COM8', start=0.5, slow_ratio=0.75, rate=0.02):
+def measure_motor(port='COM8', duty=50, slow_ratio=0.75, rate=1):
     """Assumes Pololu qik 2s9v1 attached to COM8 and the motor to M0."""
     mass_kg = question('Mass of weight in kilograms', 0.05)
     diameter_m = question('Wheel diameter in metres', 0.0479)
-    supply_voltage_v = question('Supply voltage')
 
     input('Press [Enter] to begin...')
-    print('Press [Space] when the motor starts!')
+    print('Press [Enter] when the motor starts!', end='', flush=True)
 
-    global space_pressed
-    space_pressed = False
+    track_enter = True
+    global enter_pressed
+    enter_pressed = False
     def space_listener_thread():
-        global space_pressed
-        while True:
-            ch = msvcrt.getch()
-            if ch == b' ':
-                space_pressed = True
-            else:
-                break
-            time.sleep(0.01)
-    threading.Thread(target=space_listener_thread).start()
+        global enter_pressed
+        while track_enter:
+            input()
+            enter_pressed = True
+    threading.Thread(target=space_listener_thread, daemon=True).start()
 
     up = True
-    stall_point_v = 0
-    motor_voltage_v = start
     with serial.Serial(port, 38400, timeout=1) as conn:
 
         # 8-bit PWM, 3.9 kHz.
@@ -90,41 +82,37 @@ def measure_motor(port='COM8', start=0.5, slow_ratio=0.75, rate=0.02):
 
         while True:
 
-            if space_pressed:
-                space_pressed = False
+            if enter_pressed:
+                enter_pressed = False
 
                 if up:
-                    print('Press [Space] when the motor stops!')
+                    print('Press [Enter] when the motor stops!', end='', flush=True)
                     up = False
-                    motor_voltage_v = motor_voltage_v * slow_ratio
+                    duty = duty * slow_ratio
+                    track_enter = False
                 else:
-                    print(f'{motor_voltage_v:.2f}V ({duty}/255)')
-                    stall_point_v = motor_voltage_v
                     break
-
-            duty = int((motor_voltage_v / supply_voltage_v) * 255.0)
-            duty = max(0, min(duty, 255))
 
             # M0 speed
             if duty <= 127:
-                conn.write(bytearray([0x88, duty]))
+                conn.write(bytearray([0x88, int(duty)]))
             else:
-                conn.write(bytearray([0x89, duty - 128]))
+                conn.write(bytearray([0x89, int(duty) - 128]))
 
             if up:
-                motor_voltage_v += rate
+                duty += rate
             else:
-                motor_voltage_v -= rate
+                duty -= rate
+            duty = max(0, min(duty, 255))
 
             time.sleep(0.1)
 
-        calculate(mass_kg, diameter_m, stall_point_v)
-
-        input('Press [Enter] to halt motor...')
+        stall_point_v = question('Current motor voltage')
 
         # M0 Coast
         conn.write(bytearray([0x86]))
 
+        calculate(mass_kg, diameter_m, stall_point_v)
 
 
 if __name__ == '__main__':
