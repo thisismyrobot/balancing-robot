@@ -115,7 +115,7 @@ py tester.py
     Wheel rotations (2):
     Duration of lift in seconds: 0.65
     Battery voltage (5):
-    0.10Nm (1.04kgf.cm) & 0.32W @ 5.0V & 184.62RPM
+    0.02Nm (0.17kgf.cm) & 0.32W @ 5.0V & 184.62RPM
 
 ### DG01D-E
 
@@ -126,4 +126,4 @@ py tester.py
     Wheel rotations (2): 1
     Duration of lift in seconds: 0.9666666666666667
     Battery voltage (5):
-    0.10Nm (1.04kgf.cm) & 0.11W @ 5.0V & 62.07RPM
+    0.02Nm (0.17kgf.cm) & 0.11W @ 5.0V & 62.07RPM

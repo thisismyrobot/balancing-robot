@@ -35,14 +35,16 @@ def calculate(mass_kg, diameter_m, rotations_r, time_s, voltage_v):
     # P = W/t
     power_W = work_J / time_s
 
-    # v = d / t
-    angular_velocity_rs = rotations_r / time_s
+    angular_velocity_rps = rotations_r / time_s
+
+    # ω = 2π * rotations/sec
+    angular_velocity_rads = 2 * math.pi * angular_velocity_rps
 
     # τ = P / ω
-    torque_Nm = power_W / angular_velocity_rs
+    torque_Nm = power_W / angular_velocity_rads
 
-    torque_kgcm = torque_Nm * (100 / GRAVITY);
-    angular_velocity_rpm = angular_velocity_rs * 60
+    torque_kgcm = torque_Nm * (100 / GRAVITY)
+    angular_velocity_rpm = angular_velocity_rps * 60
 
     print(f'{torque_Nm:.2f}Nm ({torque_kgcm:.2f}kgf.cm) & {power_W:.2f}W @ {voltage_v}V & {angular_velocity_rpm:.2f}RPM')
 
