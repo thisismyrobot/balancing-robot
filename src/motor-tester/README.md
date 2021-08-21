@@ -58,7 +58,9 @@ Motor rated speed (f<sub>RPM</sub>): 7100-7300rpm (I'll use 7200)
 Blocking (stall) torque (τ<sub>stall</sub>): 2.4kgf.cm (which is 0.2353596 Nm)
 
 P = (π * f<sub>RPM</sub> * τ<sub>stall</sub>) / 120
+
   = (π * 7200 * 0.2353596) / 120
+
   = 44.36 Watts @ 12V @ 3600 RPM
 
 ## Experiments in measuring comparable motor performance
