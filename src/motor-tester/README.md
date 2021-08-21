@@ -1,6 +1,64 @@
-# Experiments in measuring comparable motor performance
+# Some DC motor theory
 
-##  stall_torque_calculator.py - measuring stall torque per volt
+For a DC motor receiving a rated voltage:
+
+ - It will have a Stall Torque, and a rated (no-load) RPM
+ - Torque reduces linearly from the Stall Torque at zero RPM to zero at the rated RPM
+ - The peak power is at 1/2 of the Stall Torque - which is the same point as half the rated RPM
+
+https://nrsyed.com/2018/01/21/how-to-read-a-dc-motor-datasheet/
+
+That means you can estimate peak power by calculating the power with inputs of
+1/2 the Stall Torque and 1/2 the rated no-load RPM.
+
+## Units/constants
+
+### f<sub>RPM</sub>
+
+This is not a real unit, but I'm using it to make the formulas clearer to
+understand - it is the RPM of the motor.
+
+### P = Power (Watts)
+
+### τ = Torque (Nm)
+
+Can be calculated from kgf.cm using: τ = (kgf.cm * g) / 100
+
+Can be converted to kgf.cm using: kgf.cm = (τ * 100) / g
+
+### ω = Angular Velocity (Radians/second)
+
+Can be calculated from RPM using: ω = 2π * (f<sub>RPM</sub> / 60)
+
+### g = Gravity
+
+9.80665
+
+## Formulas
+
+### P = τ * ω
+
+Power from torque and angular velocity
+
+### Estimated power
+
+P = (τ<sub>stall</sub> / 2) * ((2π * (f<sub>RPM</sub> / 60)) / 2)
+P = (π * f<sub>RPM</sub> * τ<sub>stall</sub>) / 120
+
+#### Example
+
+https://littlebird.com.au/products/brushless-dc-motor-with-encoder-12v-159rpm?x=786402
+
+Motor rated speed (f<sub>RPM</sub>): 7100-7300rpm (I'll use 7200)
+Blocking (stall) torque (τ<sub>stall</sub>): 2.4kgf.cm (which is 0.2353596 Nm)
+
+P = (π * f<sub>RPM</sub> * τ<sub>stall</sub>) / 120
+  = (π * 7200 * 0.2353596) / 120
+  = 44.36 Watts @ 12V @ 3600 RPM
+
+## Experiments in measuring comparable motor performance
+
+###  stall_torque_calculator.py - measuring stall torque per volt
 
 ![](stall_torque_setup.jpg)
 
@@ -13,7 +71,7 @@ ratio of the stall torque and voltage to estimate a stall torque per a spec
 sheet volt value to compare motors by even if the voltage at which their stall
 torque is specified at differs.
 
-### DG01D-A130GEARMOTOR
+#### DG01D-A130GEARMOTOR
 
 This motor + gearbox is spec'd to be 0.8kgf.cm @ 4.5V. As a ratio that is
 0.17778 kgf.cm/V.
@@ -60,7 +118,7 @@ I think there is potential in this technique of estimating comparable stall
 torque between different tested motors and spec sheets, as long as the stall
 voltages are reasonable close.
 
-### DG01D-E
+#### DG01D-E
 
 pipenv run python stall_torque_calculator.py --qik
 
@@ -98,7 +156,7 @@ I had to use lower weights. On pure comparison though, the DG01D-E is has a
 measurements show it as having 1/3 of the power. No wonder it's not working
 for V3 of this robot.
 
-## tester.py - measuring motor power
+### tester.py - measuring motor power
 
 ![](DG01D-E.gif)
 
@@ -106,7 +164,7 @@ This is a little simpler. By lifting a known weight a known distance over a
 known time, using a known voltage, you can calculate the power in Watts of a
 motor.
 
-### DG01D-A130GEARMOTOR
+#### DG01D-A130GEARMOTOR
 
 py tester.py
 
@@ -117,7 +175,7 @@ py tester.py
     Battery voltage (5):
     0.02Nm (0.17kgf.cm) & 0.32W @ 5.0V & 184.62RPM
 
-### DG01D-E
+#### DG01D-E
 
 py tester.py
 
