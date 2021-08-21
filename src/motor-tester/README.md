@@ -42,7 +42,12 @@ Power from torque and angular velocity
 
 ### Estimated power
 
+Populating from above components:
+
 P = (τ<sub>stall</sub> / 2) * ((2π * (f<sub>RPM</sub> / 60)) / 2)
+
+Simplified:
+
 P = (π * f<sub>RPM</sub> * τ<sub>stall</sub>) / 120
 
 #### Example
