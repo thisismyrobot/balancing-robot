@@ -23,8 +23,8 @@
 // Closed loop motor control.
 #define WHEEL_DISTANCE_M 0.208916  // 66.5mm diameter.
 #define ENC_PULSES_PER_ROTATION 543.0  // 48:1 gearbox and ?!?! 11.3125 divisor. Odd.
-#define MOTOR_CONTROL_P 500  // 0.5m/s is approx max speed, which is 255 PWM.
-#define MOTOR_CONTROL_I 500
+#define MOTOR_CONTROL_P 50
+#define MOTOR_CONTROL_I 1000
 #define MOTOR_CONTROL_D 0
 
 // Arduino wiring configuration.
@@ -32,8 +32,8 @@
 #define LED_GPIO 25
 
 // Both motors bound together for now.
-#define MOTOR_FORWARD_GPIO 27
-#define MOTOR_REVERSE_GPIO 14
+#define MOTOR_FORWARD_GPIO 14
+#define MOTOR_REVERSE_GPIO 27
 
 #define ENC_LEFT_A_GPIO 39
 #define ENC_LEFT_B_GPIO 38

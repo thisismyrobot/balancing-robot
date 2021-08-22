@@ -89,33 +89,13 @@ void _drive(void *parameters) {
         leftPid.Compute();
         rightPid.Compute();
 
-        if (*drive.leftSpeedCommand == 0) {
-            leftPwmOutput = 0;
-        }
-        else if (*drive.leftSpeedCommand > 0) {
-            leftPwmOutput = max((double)0.0, leftPwmOutput);
-        }
-        else if (*drive.leftSpeedCommand < 0) {
-            leftPwmOutput = min((double)0.0, leftPwmOutput);
-        }
-
-        if (*drive.rightSpeedCommand == 0) {
-            rightPwmOutput = 0;
-        }
-        else if (*drive.rightSpeedCommand > 0) {
-            rightPwmOutput = max((double)0.0, leftPwmOutput);
-        }
-        else if (*drive.rightSpeedCommand < 0) {
-            rightPwmOutput = min((double)0.0, leftPwmOutput);
-        }
-
         _setPwm(leftPwmOutput, rightPwmOutput);
 
         lastPidUpdateMillis = nowMillis;
         lastLeftCount = leftCount;
         lastRightCount = rightCount;
 
-        delay(5);
+        delay(200);  // 5Hz okay
     }
 }
 
@@ -129,11 +109,11 @@ void _setPwm(double leftPwmVector, double rightPwmVector)
     int reverseValue = 0;
 
     if (leftPwm > 0) {
-        forwardValue = _map(leftPwm, 0, 255, 100, 255);
+        forwardValue = _map(leftPwm, 0, 255, 30, 255);
     } 
     else if (leftPwm < 0){
         leftPwm = -leftPwm;
-        reverseValue = _map(leftPwm, 0, 255, 100, 255);
+        reverseValue = _map(leftPwm, 0, 255, 30, 255);
     }
 
     ledcWrite(_forwardPwmChannel, forwardValue);
