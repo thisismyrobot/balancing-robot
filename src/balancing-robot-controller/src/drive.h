@@ -11,8 +11,10 @@ typedef struct Drive_t
 } DriveCommands_t;
 
 void setDriveParams(
-    int forwardPwmChannel,
-    int reversePwmChannel,
+    int forwardLeftPwmChannel,
+    int reverseLeftPwmChannel,
+    int forwardRightPwmChannel,
+    int reverseRightPwmChannel,
     int encLeftAGpio,
     int encLeftBGpio,
     int encRightAGpio,

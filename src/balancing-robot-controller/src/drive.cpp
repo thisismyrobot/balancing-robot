@@ -10,31 +10,37 @@ double _driveD;
 ESP32Encoder _encoderLeft;
 ESP32Encoder _encoderRight;
 
-int _forwardPwmChannel = 0;
-int _reversePwmChannel = 1;
+int _forwardLeftPwmChannel = 0;
+int _reverseLeftPwmChannel = 1;
+int _forwardRightPwmChannel = 2;
+int _reverseRightPwmChannel = 3;
 double _wheelDistanceM;
-double _pulsesPerRadian;
+double _pulsesPerRevolution;
 
 // The drive task runs on the non-default core 0.
 TaskHandle_t _DriveCoreZeroTask;
 
 void setDriveParams(
-    int forwardPwmChannel,
-    int reversePwmChannel,
+    int forwardLeftPwmChannel,
+    int reverseLeftPwmChannel,
+    int forwardRightPwmChannel,
+    int reverseRightPwmChannel,
     int encLeftAGpio,
     int encLeftBGpio,
     int encRightAGpio,
     int encRightBGpio,
     double wheelDistanceM,
-    double pulsesPerRadian,
+    double pulsesPerRevolution,
     double p,
     double i,
     double d)
 {
-    _forwardPwmChannel = forwardPwmChannel;
-    _reversePwmChannel = reversePwmChannel;
+    _forwardLeftPwmChannel = forwardLeftPwmChannel;
+    _reverseLeftPwmChannel = reverseLeftPwmChannel;
+    _forwardRightPwmChannel = forwardRightPwmChannel;
+    _reverseRightPwmChannel = reverseRightPwmChannel;
     _wheelDistanceM = wheelDistanceM;
-    _pulsesPerRadian = pulsesPerRadian;
+    _pulsesPerRevolution = pulsesPerRevolution;
     _driveP = p;
     _driveI = i;
     _driveD = d;
@@ -104,25 +110,38 @@ void _setPwm(double leftPwmVector, double rightPwmVector)
 {
     // TODO: USE RIGHT SIDE TOO.
     double leftPwm = constrain(leftPwmVector, -255, 255);
+    double rightPwm = constrain(rightPwmVector, -255, 255);
 
-    int forwardValue = 0;
-    int reverseValue = 0;
+    int forwardLeftValue = 0;
+    int reverseLeftValue = 0;
+    int forwardRightValue = 0;
+    int reverseRightValue = 0;
 
     if (leftPwm > 0) {
-        forwardValue = _map(leftPwm, 0, 255, 30, 255);
+        forwardLeftValue = _map(leftPwm, 0, 255, 30, 255);
     } 
     else if (leftPwm < 0){
         leftPwm = -leftPwm;
-        reverseValue = _map(leftPwm, 0, 255, 30, 255);
+        reverseLeftValue = _map(leftPwm, 0, 255, 30, 255);
     }
 
-    ledcWrite(_forwardPwmChannel, forwardValue);
-    ledcWrite(_reversePwmChannel, reverseValue);
+    if (rightPwm > 0) {
+        forwardRightValue = _map(rightPwm, 0, 255, 30, 255);
+    } 
+    else if (rightPwm < 0){
+        rightPwm = -rightPwm;
+        reverseRightValue = _map(rightPwm, 0, 255, 30, 255);
+    }
+
+    ledcWrite(_forwardLeftPwmChannel, forwardLeftValue);
+    ledcWrite(_reverseLeftPwmChannel, reverseLeftValue);
+    ledcWrite(_forwardRightPwmChannel, forwardRightValue);
+    ledcWrite(_reverseRightPwmChannel, reverseRightValue);
 }
 
 double _toDistanceMetres(double count)
 {
-    return (count / _pulsesPerRadian) * _wheelDistanceM;
+    return (count / _pulsesPerRevolution) * _wheelDistanceM;
 }
 
 // Arduino built-in map is integer only.
