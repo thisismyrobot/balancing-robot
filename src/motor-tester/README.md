@@ -52,16 +52,18 @@ P = (π * f<sub>RPM</sub> * τ<sub>stall</sub>) / 120
 
 #### Example
 
-https://littlebird.com.au/products/brushless-dc-motor-with-encoder-12v-159rpm?x=786402
+https://www.banggood.com/CHIHAI-MOTOR-DC12V-350rpm-Encoder-Motor-DC-Gear-Motor-with-Cover-p-1245484.html
 
-Motor rated speed (f<sub>RPM</sub>): 7100-7300rpm (I'll use 7200)
-Blocking (stall) torque (τ<sub>stall</sub>): 2.4kgf.cm (which is 0.2353596 Nm)
+Motor rated speed (f<sub>RPM</sub>): 11907rpm (after 34.02:1 gearbox)
+Blocking (stall) torque (τ<sub>stall</sub>): 12kg.cm (which after 34.02:1 gearbox is 0.03459 Nm)
 
 P = (π * f<sub>RPM</sub> * τ<sub>stall</sub>) / 120
 
-  = (π * 7200 * 0.2353596) / 120
+  = (π * 11907 * 0.03459) / 120
 
-  = 44.36 Watts @ 12V @ 3600 RPM
+  = 10.7 Watts @ 12V @ 5954 RPM
+
+As compared to 8.5W on document?
 
 ## Experiments in measuring comparable motor performance
 
