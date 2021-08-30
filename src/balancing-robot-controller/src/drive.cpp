@@ -108,7 +108,6 @@ void _drive(void *parameters) {
 
 void _setPwm(double leftPwmVector, double rightPwmVector)
 {
-    // TODO: USE RIGHT SIDE TOO.
     double leftPwm = constrain(leftPwmVector, -255, 255);
     double rightPwm = constrain(rightPwmVector, -255, 255);
 
