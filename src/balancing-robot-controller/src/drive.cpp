@@ -118,19 +118,19 @@ void _setPwm(double leftPwmVector, double rightPwmVector)
     int reverseRightValue = 0;
 
     if (leftPwm > 0) {
-        forwardLeftValue = _map(leftPwm, 0, 255, 30, 255);
+        forwardLeftValue = _map(leftPwm, 0, 255, 40, 255);
     } 
     else if (leftPwm < 0){
         leftPwm = -leftPwm;
-        reverseLeftValue = _map(leftPwm, 0, 255, 30, 255);
+        reverseLeftValue = _map(leftPwm, 0, 255, 40, 255);
     }
 
     if (rightPwm > 0) {
-        forwardRightValue = _map(rightPwm, 0, 255, 30, 255);
+        forwardRightValue = _map(rightPwm, 0, 255, 40, 255);
     } 
     else if (rightPwm < 0){
         rightPwm = -rightPwm;
-        reverseRightValue = _map(rightPwm, 0, 255, 30, 255);
+        reverseRightValue = _map(rightPwm, 0, 255, 40, 255);
     }
 
     ledcWrite(_forwardLeftPwmChannel, forwardLeftValue);

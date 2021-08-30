@@ -53,10 +53,9 @@
 #define MSP_ATTITUDE 108
 
 // PID configuration.
-#define P 0.05
-#define I 0.3
-#define D 0.001
-#define MIN_MOTOR (255.0 / BATTERY_VOLTAGE) * MIN_MOTOR_VOLTS
+#define P 0.06
+#define I 0.2
+#define D 0.0
 
 // PID instances.
 double pitchPidSetpoint = 0;
@@ -157,27 +156,6 @@ double getAveragePitch(int loops, int delayMs)
 
 void loop() {
 
-    leftSpeedCommand = 0.1;
-    rightSpeedCommand = 0.1;
-
-    delay(5000);
-
-    leftSpeedCommand = 0.5;
-    rightSpeedCommand = 0.5;
-
-    delay(5000);
-
-    leftSpeedCommand = 1;
-    rightSpeedCommand = 1;
-
-    delay(5000);
-
-    leftSpeedCommand = -0.3;
-    rightSpeedCommand = -0.3;
-
-    delay(5000);
-
-/*
     double pitch = readPitch();
 
     if (pitch > ANGLE_FALLEN || pitch < -ANGLE_FALLEN) {
@@ -197,7 +175,7 @@ void loop() {
     rightSpeedCommand = pitchPidOutput;
 
     updateStats();
-*/
+
     if(!enabled()) {
         reset();
     }
