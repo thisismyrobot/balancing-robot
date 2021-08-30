@@ -101,7 +101,7 @@ void _drive(void *parameters) {
         lastLeftCount = leftCount;
         lastRightCount = rightCount;
 
-        delay(200);  // 5Hz okay
+        delay(100);  // 10Hz okay
     }
 }
 
@@ -126,11 +126,11 @@ void _setPwm(double leftPwmVector, double rightPwmVector)
     }
 
     if (rightPwm > 0) {
-        forwardRightValue = _map(rightPwm, 0, 255, 40, 255);
+        forwardRightValue = _map(rightPwm, 0, 255, 45, 255);
     } 
     else if (rightPwm < 0){
         rightPwm = -rightPwm;
-        reverseRightValue = _map(rightPwm, 0, 255, 40, 255);
+        reverseRightValue = _map(rightPwm, 0, 255, 45, 255);
     }
 
     ledcWrite(_forwardLeftPwmChannel, forwardLeftValue);

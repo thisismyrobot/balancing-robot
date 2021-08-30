@@ -53,7 +53,7 @@
 #define MSP_ATTITUDE 108
 
 // PID configuration.
-#define P 0.06
+#define P 0.05
 #define I 0.2
 #define D 0.0
 
