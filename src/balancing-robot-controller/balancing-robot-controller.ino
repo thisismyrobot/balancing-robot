@@ -31,8 +31,8 @@
 #define ENABLE_GPIO 13
 #define LED_GPIO 25
 
-#define MOTOR_FORWARD_LEFT_GPIO 14
-#define MOTOR_REVERSE_LEFT_GPIO 27
+#define MOTOR_FORWARD_LEFT_GPIO 27
+#define MOTOR_REVERSE_LEFT_GPIO 14
 #define MOTOR_FORWARD_RIGHT_GPIO 26
 #define MOTOR_REVERSE_RIGHT_GPIO 25
 
@@ -157,6 +157,27 @@ double getAveragePitch(int loops, int delayMs)
 
 void loop() {
 
+    leftSpeedCommand = 0.1;
+    rightSpeedCommand = 0.1;
+
+    delay(5000);
+
+    leftSpeedCommand = 0.5;
+    rightSpeedCommand = 0.5;
+
+    delay(5000);
+
+    leftSpeedCommand = 1;
+    rightSpeedCommand = 1;
+
+    delay(5000);
+
+    leftSpeedCommand = -0.3;
+    rightSpeedCommand = -0.3;
+
+    delay(5000);
+
+/*
     double pitch = readPitch();
 
     if (pitch > ANGLE_FALLEN || pitch < -ANGLE_FALLEN) {
@@ -176,7 +197,7 @@ void loop() {
     rightSpeedCommand = pitchPidOutput;
 
     updateStats();
-
+*/
     if(!enabled()) {
         reset();
     }
@@ -199,7 +220,6 @@ void setupPins() {
     ledcSetup(PWM_MOTOR_REVERSE_RIGHT_CHANNEL, PWM_FREQUENCY, PWM_RESOLUTION);
     ledcAttachPin(MOTOR_FORWARD_RIGHT_GPIO, PWM_MOTOR_FORWARD_RIGHT_CHANNEL);
     ledcAttachPin(MOTOR_REVERSE_RIGHT_GPIO, PWM_MOTOR_REVERSE_RIGHT_CHANNEL);
-
     ledcWrite(PWM_MOTOR_FORWARD_RIGHT_CHANNEL, 0);
     ledcWrite(PWM_MOTOR_REVERSE_RIGHT_CHANNEL, 0);
 }
