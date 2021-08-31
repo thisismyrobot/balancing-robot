@@ -1,7 +1,7 @@
 # Balancing robot
 
-Using a BetaFlight-equipped flight controller to give the orientation and an
-Arduino Nano for control.
+Using a BetaFlight-equipped flight controller (and later on an MPU6050) to
+give the orientation and an Arduino Nano for control.
 
 End goal is the Wheelie Boy from The Peripheral.
 
@@ -13,25 +13,40 @@ probably WIP and may not do anything useful :)
 
 ## Version 3
 
-Currently WIP.
+Currently WIP. Most recent work has completed closed loop motor control but
+that's not working well enough - I think I need more pulses per rotation on
+the encoder to achieve the faster cycle times which I seem to need for it to
+perform at all well. Or bigger wheels, that'll help.
 
 ![](doc/build%203.gif) ![](doc/build%203.jpg)
 
 ### Thoughts
 
- * Will use similarly sized DC motors but with encoders - Search for "DG01D-E"
+ * Will add encoders for (preferably) closed loop motor control or
+   (worst-case) PID feedback and creep detection.
  * Most likely will use ESP32 to handle extra interrupts etc. Alternatively an
    M5Stack-C that I have with built-in IMU.
  * Should be able to read from F3 board - if using that - at a higher baud
    with ESP32. Backup is MPU6050.
  * Stream UDP telemetry and maybe even take commands - using second ESP32
    core? UDP for reduced cycle time.
- * I'll need to build a PID loop for the motor control too, something new and
+ * I'll need to build a PID loop for the motor control, something new and
    probably where I'll start.
  * Also starting to think about what components would fit in a "Wheelie Boy"
    chassis. Might measure the performance of these motors if they work to have
    something to compare to. Also consider 11-12cm diameter wheels as that will
    be the end-goal
+
+### Hardware (WIP)
+
+ * ~~HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration except for fast serial response.~~ Serial interface (or my code) locks up after > 30s.
+ * MPU6050
+ * 2 x Solarbotics L293D Secret Motor Driver
+ * Heltec Automation WiFi Kit 32 (an ESP32 board) for control
+ * ~~2 x DG01D-E 48:1 DC motor w/wheel, 3-9V~~ Not powerful enough
+ * 2 x 48.75:1 DC motor w/wheel, 3-12V (search for "Arduino DC Motor with Wheel and Rubber Tyres") + bodged-on encoders from DG01D-E.
+ * Pololu 5V, 2.5A Step-Down Voltage Regulator D24V22F5
+ * 3S LiPo (450mAh 45C)
 
 ## Version 2
 
