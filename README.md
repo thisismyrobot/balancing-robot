@@ -39,12 +39,10 @@ perform at all well. Or bigger wheels, that'll help.
 
 ### Hardware (WIP)
 
- * ~~HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration except for fast serial response.~~ Serial interface (or my code) locks up after > 30s.
- * MPU6050
+ * ~~HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration except for fast serial response.~~ MPU6050. Serial interface (or my code) locks up after > 30s.
  * 2 x Solarbotics L293D Secret Motor Driver
  * Heltec Automation WiFi Kit 32 (an ESP32 board) for control
- * ~~2 x DG01D-E 48:1 DC motor w/wheel, 3-9V~~ Not powerful enough
- * 2 x 48.75:1 DC motor w/wheel, 3-12V (search for "Arduino DC Motor with Wheel and Rubber Tyres") + bodged-on encoders from DG01D-E.
+ * ~~2 x DG01D-E 48:1 DC motor w/wheel, 3-9V~~ 2 x 48.75:1 DC motor w/wheel, 3-12V (search for "Arduino DC Motor with Wheel and Rubber Tyres") + bodged-on encoders from DG01D-E, as the DG01D-E is just not powerful enough. Measurements suggest 1/3 of the power.
  * Pololu 5V, 2.5A Step-Down Voltage Regulator D24V22F5
  * 3S LiPo (450mAh 45C)
 
