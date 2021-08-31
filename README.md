@@ -1,7 +1,7 @@
 # Balancing robot
 
 Using a BetaFlight-equipped flight controller (and later on an MPU6050) to
-give the orientation and an Arduino Nano for control.
+give the orientation and an Arduino Nano (and later an ESP32) for control.
 
 End goal is the Wheelie Boy from The Peripheral.
 
