@@ -22,6 +22,7 @@ probably WIP and may not do anything useful :)
  * Will move control board to bottom to simplify wiring and to stop instances
    where I tap the "head" back and forward while tuning from saturating the
    accelerometers which caused it to lose an accurate "zero" inclination.
+ * Definitely using an MPU6050.
 
 ## Version 3
 
