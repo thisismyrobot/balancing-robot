@@ -11,40 +11,40 @@ towards achieving (or not) this goal.
 If you want to try out some of the code, use the tags below, anything else is
 probably WIP and may not do anything useful :)
 
-## Version 3
-
-Currently WIP. Most recent work has completed closed loop motor control but
-that's not working well enough - I think I need more pulses per rotation on
-the encoder to achieve the faster cycle times which I seem to need for it to
-perform at all well. Or bigger wheels, that'll help.
-
-![](doc/build%203.gif) ![](doc/build%203.jpg)
+## Version 4 (TODO/WIP)
 
 ### Thoughts
 
- * Will add encoders for (preferably) closed loop motor control or
-   (worst-case) PID feedback and creep detection.
- * Most likely will use ESP32 to handle extra interrupts etc. Alternatively an
-   M5Stack-C that I have with built-in IMU.
- * Should be able to read from F3 board - if using that - at a higher baud
-   with ESP32. Backup is MPU6050.
- * Stream UDP telemetry and maybe even take commands - using second ESP32
-   core? UDP for reduced cycle time.
- * I'll need to build a PID loop for the motor control, something new and
-   probably where I'll start.
- * Also starting to think about what components would fit in a "Wheelie Boy"
-   chassis. Might measure the performance of these motors if they work to have
-   something to compare to. Also consider 11-12cm diameter wheels as that will
-   be the end-goal
+ * Will build a new chassis, with new motors, and target wheel size.
+ * If encoders are high enough resolution I will retry the closed-loop
+   control, if not will instead use the behaviour (ie oscillating, running
+   away) to self tune a little.
+ * Will move control board to bottom to simplify wiring and to stop instances
+   where I tap the "head" back and forward while tuning from saturating the
+   accelerometers which caused it to lose an accurate "zero" inclination.
 
-### Hardware (WIP)
+## Version 3
 
- * ~~HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration except for fast serial response.~~ MPU6050. Serial interface (or my code) locks up after > 30s.
+See [Tag 3.0](https://github.com/thisismyrobot/balancing-robot/releases/tag/3.0)
+
+![](doc/build%203.gif) ![](doc/build%203.jpg)
+
+### Hardware
+
+ * HappyModel SP Racing F3 EVO Brushed Micro FC - running BetaFlight 3.1.7 with minimal configuration except for fast serial response.
  * 2 x Solarbotics L293D Secret Motor Driver
  * Heltec Automation WiFi Kit 32 (an ESP32 board) for control
  * ~~2 x DG01D-E 48:1 DC motor w/wheel, 3-9V~~ 2 x 48.75:1 DC motor w/wheel, 3-12V (search for "Arduino DC Motor with Wheel and Rubber Tyres") + bodged-on encoders from DG01D-E, as the DG01D-E is just not powerful enough. Measurements suggest 1/3 of the power.
  * Pololu 5V, 2.5A Step-Down Voltage Regulator D24V22F5
  * 3S LiPo (450mAh 45C)
+
+### Thoughts
+
+Not a great success. Switching to an ESP32 was a good, but implementing
+closed-loop motor control didn't improve motor speed accuracy as the encoder
+counts per revolution were too low. As a consequence a slower PID loop
+frequency was needed to ensure enough counts were taken to correct the speed,
+but that introduced lag in response.
 
 ## Version 2
 
